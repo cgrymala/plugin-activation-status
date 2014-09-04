@@ -2,7 +2,7 @@
 /**
  * Define the Plugin_Activation_Status class
  * @package Plugin Activation Status
- * @version 0.3
+ * @version 1.0
  */
 
 class Plugin_Activation_Status {
@@ -250,8 +250,11 @@ class Plugin_Activation_Status {
 <?php
 		$ct = 0;
 		foreach ( $tmp as $p ) {
+			$url = network_admin_url( 'plugins.php' );
+			$url = wp_nonce_url( sprintf( '%5$s?action=delete-selected&amp;checked[]=%1$s&amp;plugin-status=%2$s&amp;paged=%3$s&amp;s=%4$s', $p, 'all', 1, null, $url ), 'bulk-plugins' );
+			$dellink = sprintf( ' (<a href="%s">%s</a>)', $url, __( 'Delete' ) );
 ?>
-			<li class="<?php echo $ct%2 ? 'active' : 'inactive' ?>"><?php echo array_key_exists( $p, $this->all_plugins ) ? $this->all_plugins[$p]['Name'] : $p ?></li>
+			<li class="<?php echo $ct%2 ? 'active' : 'inactive' ?>"><?php echo array_key_exists( $p, $this->all_plugins ) ? $this->all_plugins[$p]['Name'] : $p ?><?php echo $dellink ?></li>
 <?php
 			$ct++;
 		}

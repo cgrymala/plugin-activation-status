@@ -2,9 +2,9 @@
 Contributors: cgrymala
 Donate link: http://giving.umw.edu/
 Tags: plugins, multisite, multi-network, active, network-active, status
-Requires at least: 3.4.2
-Tested up to: 3.8.1
-Stable tag: 0.2
+Requires at least: 3.8
+Tested up to: 4.0
+Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,10 @@ To make a long story short (too late!), those are plugins that are still conside
 
 == Changelog ==
 
+= 1.0 =
+* Tested compatibility with WordPress 4.0
+* Added link allowing you to delete inactive plugins
+
 = 0.3 =
 * Added new buttons allowing you to deactivate plugins on all sites/networks from within the list
 * Tested with WP 3.8.2 to ensure everything still works
@@ -71,6 +75,9 @@ To make a long story short (too late!), those are plugins that are still conside
 * First beta release of "UMW Plugin Locator"
 
 == Upgrade Notice ==
+
+= 1.0 =
+This version adds the ability to deactivate any active plugins and delete any inactive plugins.
 
 = 0.2 =
 The file structure for this plugin, along with the file name of the main plugin file, have changed. You should *delete* the old copy of this plugin before installing this new version.
