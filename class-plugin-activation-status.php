@@ -2,7 +2,7 @@
 /**
  * Define the Plugin_Activation_Status class
  * @package Plugin Activation Status
- * @version 1.0
+ * @version 1.0.1
  */
 
 class Plugin_Activation_Status {

@@ -1,20 +1,20 @@
 # Plugin Activation Status #
 **Contributors:** cgrymala
-  
+
 **Donate link:** http://giving.umw.edu/
-  
+
 **Tags:** plugins, multisite, multi-network, active, network-active, status
-  
+
 **Requires at least:** 3.8
-  
-**Tested up to:** 4.0
-  
-**Stable tag:** 1.0
-  
+
+**Tested up to:** 4.3
+
+**Stable tag:** 1.0.1
+
 **License:** GPLv2 or later
-  
+
 **License URI:** http://www.gnu.org/licenses/gpl-2.0.html
-  
+
 
 Scans a multisite or multi-network installation to identify all plugins that are active or not.
 
@@ -22,11 +22,11 @@ Scans a multisite or multi-network installation to identify all plugins that are
 
 Plugin Activation Status makes it easier for owners of multisite and multi-network WordPress installations to perform plugin audits on their installations. The plugin generates a list of plugins that are not currently active on any sites or networks. It generates a separate list of plugins that are active somewhere within the installation, and provides details about where and how those plugins are activated.
 
-This plugin first retrieves a full list of all of the plugins that are network-activated throughout your installation. Then, it loops through all of the sites in your installation, retrieving a list of all of the active plugins on each site. Next, it runs a diff between the full list of installed plugins and the list of all active plugins. 
+This plugin first retrieves a full list of all of the plugins that are network-activated throughout your installation. Then, it loops through all of the sites in your installation, retrieving a list of all of the active plugins on each site. Next, it runs a diff between the full list of installed plugins and the list of all active plugins.
 
-Once it retrieves all of that information, it outputs two separate lists. 
+Once it retrieves all of that information, it outputs two separate lists.
 
-The first list is the list of Inactive Plugins; all plugins that are installed, but not activated anywhere within WordPress will be listed there. The second list shows all of the Active Plugins; all plugins that are installed and activated somewhere within WordPress are shown there. 
+The first list is the list of Inactive Plugins; all plugins that are installed, but not activated anywhere within WordPress will be listed there. The second list shows all of the Active Plugins; all plugins that are installed and activated somewhere within WordPress are shown there.
 
 Within the Active Plugins list, each plugin also has a list of all of the places the plugin is active (at the top, a list of all of the places it's network-active; at the bottom, all of the places it's normally-activated).
 

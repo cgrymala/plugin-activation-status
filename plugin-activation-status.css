@@ -1,6 +1,6 @@
 /**
  * Styles for the admin area of the Plugin Activation Status plugin
- * @version 1.0
+ * @version 1.0.1
  */
 .inactive-plugins.plugins ol > li {
 	list-style: decimal;
