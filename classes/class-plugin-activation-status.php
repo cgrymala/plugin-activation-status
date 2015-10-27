@@ -2,7 +2,7 @@
 /**
  * Define the Plugin_Activation_Status class
  * @package Plugin Activation Status
- * @version 1.0.1
+ * @version 1.1
  */
 
 class Plugin_Activation_Status {
@@ -53,7 +53,7 @@ class Plugin_Activation_Status {
 	function enqueue_scripts() {
 		/*print( "\n<!-- CSS File Location: " . plugins_url( 'plugin-activation-status.css', __FILE__ ) . " -->\n" );*/
 		if ( isset( $_GET['page'] ) && 'all_active_plugins' == $_GET['page'] ) {
-			wp_enqueue_style( 'plugin-activation-status', plugins_url( 'plugin-activation-status.css', __FILE__ ), array( 'colors' ), '0.2.3', 'all' );
+			wp_enqueue_style( 'plugin-activation-status', plugins_url( '/styles/plugin-activation-status.css', dirname( __FILE__ ) ), array( 'colors' ), '1.0.1', 'all' );
 			wp_enqueue_script( 'post' );
 		}
 	}
@@ -276,6 +276,20 @@ class Plugin_Activation_Status {
 			echo get_site_option( 'pas_active_plugins', __( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' ) );
 			return;
 		}
+		
+		if ( ! class_exists( 'WP_List_Table' ) )
+			require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+		if ( ! class_exists( 'Plugin_Activation_Status_List_Table' ) ) 
+			require_once( plugin_dir_path( __FILE__ ) . '/_inc/class-plugin-activation-status-list-table.php' );
+		
+		$table = new Plugin_Activation_Status_List_Table();
+		$table->set_all_plugins( $this->all_plugins );
+		$table->set_active_plugins( $this->active_plugins );
+		$table->set_active_on( $this->active_on );
+		$table->prepare_items( $this->active_plugins );
+		$table->display();
+		
+		return;
 		
 		$tmp = array();
 		foreach ( $this->active_plugins as $p ) {
