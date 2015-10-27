@@ -58,6 +58,10 @@ To make a long story short (too late!), those are plugins that are still conside
 
 == Changelog ==
 
+= 1.1 =
+* Reorganize files within plugin folder
+* Re-formulate status table to use native WP_List_Table layout
+
 = 1.0 =
 * Tested compatibility with WordPress 4.0
 * Added link allowing you to delete inactive plugins
@@ -75,6 +79,9 @@ To make a long story short (too late!), those are plugins that are still conside
 * First beta release of "UMW Plugin Locator"
 
 == Upgrade Notice ==
+
+= 1.1 =
+The file structure of this plugin has changed; if you are upgrading manually (especially if this is a mu-plugin), be sure to delete old files & upload all-new versions
 
 = 1.0 =
 This version adds the ability to deactivate any active plugins and delete any inactive plugins.
