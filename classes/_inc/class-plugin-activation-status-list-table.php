@@ -113,7 +113,7 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 				foreach ( $item[$column_name] as $site_id=>$site_name ) {
 					$rt .= sprintf( '<li>%d. %s</li>', $site_id, $site_name );
 				}
-				$rt .= '</ol>';
+				$rt .= '</ul>';
 				return $rt;
 				break;
 			default : 
