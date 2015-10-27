@@ -88,7 +88,7 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 	function prepare_items( $plugins=array() ) {
 		$this->_column_headers = $this->get_column_info();
 		$this->items = array();
-		foreach ( $this->active_plugins as $k ) {
+		foreach ( $this->active_on as $k=>$v ) {
 			$this->items[] = array(
 				'plugin-name'    => $this->get_plugin_name( $k ), 
 				'network-active' => $this->get_network_active_on( $k ), 
