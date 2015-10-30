@@ -209,6 +209,13 @@ class Plugin_Activation_Status {
 			if ( ! in_array( $k, $this->active_plugins ) )
 				$this->inactive_plugins[] = $k;
 		}
+		
+		update_site_option( 'pas_active_plugins', array( 
+			'all_plugins'      => $this->all_plugins, 
+			'active_plugins'   => $this->active_plugins, 
+			'active_on'        => $this->active_on, 
+			'inactive_plugins' => $this->inactive_plugins 
+		) );
 	}
 	
 	/**
@@ -273,8 +280,10 @@ class Plugin_Activation_Status {
 	 */
 	function list_active_plugins() {
 		if ( $this->use_cache ) {
-			echo get_site_option( 'pas_active_plugins', __( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' ) );
-			return;
+			$tmp = get_site_option( 'pas_active_plugins', array( 'all_plugins' => array(), 'active_plugins' => array(), 'active_on' => array() ) );
+			$this->all_plugins = $tmp['all_plugins'];
+			$this->active_plugins = $tmp['active_plugins'];
+			$this->active_on = $tmp['active_on'];
 		}
 		
 		if ( ! class_exists( 'WP_List_Table' ) )
