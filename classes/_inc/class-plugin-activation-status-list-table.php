@@ -65,7 +65,7 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 	
 	function get_sortable_columns() {
 		return apply_filters( 'plugin-activation-status-list-table-sortable', array(
-			'name' => array( 'name', false )
+			'plugin-name' => array( 'plugin-name', true )
 		) );
 	}
 	
@@ -94,7 +94,9 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 				'blog-active'    => $this->get_blog_active_on( $k ), 
 			);
 		}
-		usort( $this->items, array( &$this, 'usort_reorder' ) );
+		if ( ( isset( $_GET['orderby'] ) && 'plugin-name' == $_GET['orderby'] ) || ! isset( $_GET['orderby'] ) ) {
+			usort( $this->items, array( &$this, 'usort_reorder' ) );
+		}
 		
 		$this->process_bulk_action();
 	}
@@ -135,12 +137,13 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 		$orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'plugin-name';
 		$order = ( ! empty($_GET['order'] ) ) ? $_GET['order'] : 'asc';
 		
+		if ( 'inactive-plugin-name' == $orderby ) {
+			$order = 'asc';
+			$orderby = 'plugin-name';
+		}
+		
 		if ( 'plugin-name' == $orderby ) {
-			$result = strcmp( $this->get_plugin_name( $a[$orderby] ), $this->get_plugin_name( $b[$orderby] ) );
-		} else if ( is_numeric( $a[$orderby] ) && is_numeric( $b[$orderby] ) ) {
-			$result = intval( $a[$orderby] ) < intval( $b[$orderby] ) ? -1 : ( intval( $a[$orderby] ) > intval( $b[$orderby] ) ? 1 : 0 );
-		} else {
-			$result = strcmp( $a[$orderby], $b[$orderby] );
+			$result = strcasecmp( $this->get_plugin_name( $a[$orderby] ), $this->get_plugin_name( $b[$orderby] ) );
 		}
 		
 		return 'asc' == $order ? $result : ( $result * -1 );

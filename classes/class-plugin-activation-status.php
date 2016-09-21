@@ -252,7 +252,11 @@ class Plugin_Activation_Status {
 		$table->set_all_plugins( $this->all_plugins );
 		$table->set_inactive_plugins( $this->inactive_plugins );
 		$table->prepare_items( $this->inactive_plugins );
+		
+		echo '<form id="inactive-plugin-list-table" method="post">';
+		echo '<input type="hidden" name="page" value="' . $_REQUEST['page'] . '" />';
 		$table->display();
+		echo '</form>';
 		
 		return;
 	}
@@ -282,7 +286,11 @@ class Plugin_Activation_Status {
 		$table->set_active_plugins( $this->active_plugins );
 		$table->set_active_on( $this->active_on );
 		$table->prepare_items( $this->active_plugins );
+		
+		echo '<form id="active-plugin-list-table" method="post">';
+		echo '<input type="hidden" name="page" value="' . $_REQUEST['page'] . '" />';
 		$table->display();
+		echo '</form>';
 		
 		return;
 	}

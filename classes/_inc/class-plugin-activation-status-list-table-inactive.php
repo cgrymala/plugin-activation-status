@@ -37,20 +37,20 @@ class Plugin_Activation_Status_List_Table_Inactive extends WP_List_Table {
 	function get_columns() {
 		return apply_filters( 'plugin-activation-status-list-table-inactive-columns', array(
 			'cb'             => '<input type="checkbox"/>', 
-			'plugin-name'    => __( 'Plugin Name', 'plugin-activation-status' ), 
-			'raw'            => __( 'Raw Plugin Data', 'plugin-activation-status' ), 
+			'inactive-plugin-name'    => __( 'Plugin Name', 'plugin-activation-status' ), 
+			'inactive-raw'            => __( 'Raw Plugin Data', 'plugin-activation-status' ), 
 		) );
 	}
 	
 	function get_hidden_columns() {
 		return apply_filters( 'plugin-activation-status-list-table-inactive-hidden', array(
-			'raw', 
+			'inactive-raw', 
 		) );
 	}
 	
 	function get_sortable_columns() {
 		return apply_filters( 'plugin-activation-status-list-table-inactive-sortable', array(
-			'name' => array( 'name', false )
+			'inactive-plugin-name' => array( 'inactive-plugin-name', true )
 		) );
 	}
 	
@@ -73,16 +73,18 @@ class Plugin_Activation_Status_List_Table_Inactive extends WP_List_Table {
 		$this->items = array();
 		foreach ( $plugins as $k=>$v ) {
 			$this->items[] = array(
-				'plugin-name'    => $this->get_plugin_name( $k ), 
+				'inactive-plugin-name'    => $this->get_plugin_name( $v ), 
 			);
 		}
-		usort( $this->items, array( &$this, 'usort_reorder' ) );
+		if ( ( isset( $_GET['orderby'] ) && 'inactive-plugin-name' == $_GET['orderby'] ) || ! isset( $_GET['orderby'] ) ) {
+			usort( $this->items, array( &$this, 'usort_reorder' ) );
+		}
 		
 		$this->process_bulk_action();
 	}
 	
 	function column_cb( $item ) {
-		return sprintf( '<input type="checkbox" name="pas_plugin_bulk_actions[]" value="%s"/>', esc_attr( $item['plugin-name'] ) );
+		return sprintf( '<input type="checkbox" name="pas_plugin_bulk_actions_inactive[]" value="%s"/>', esc_attr( $item['plugin-name'] ) );
 	}
 	
 	function column_default( $item, $column_name=null ) {
@@ -97,21 +99,22 @@ class Plugin_Activation_Status_List_Table_Inactive extends WP_List_Table {
 	}
 	
 	function process_bulk_action() {
-		if ( 'delete' == $this->current_action() ) {
+		if ( 'delete-inactive' == $this->current_action() ) {
 			wp_die( 'This is where we would delete the selected plugins' );
 		}
 	}
 	
 	function usort_reorder( $a, $b ) {
-		$orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'plugin-name';
+		$orderby = ( ! empty( $_GET['orderby'] ) ) ? $_GET['orderby'] : 'inactive-plugin-name';
 		$order = ( ! empty($_GET['order'] ) ) ? $_GET['order'] : 'asc';
 		
 		if ( 'plugin-name' == $orderby ) {
-			$result = strcmp( $this->get_plugin_name( $a[$orderby] ), $this->get_plugin_name( $b[$orderby] ) );
-		} else if ( is_numeric( $a[$orderby] ) && is_numeric( $b[$orderby] ) ) {
-			$result = intval( $a[$orderby] ) < intval( $b[$orderby] ) ? -1 : ( intval( $a[$orderby] ) > intval( $b[$orderby] ) ? 1 : 0 );
-		} else {
-			$result = strcmp( $a[$orderby], $b[$orderby] );
+			$order = 'asc';
+			$orderby = 'inactive-plugin-name';
+		}
+		
+		if ( 'inactive-plugin-name' == $orderby ) {
+			$result = strcasecmp( $this->get_plugin_name( $a[$orderby] ), $this->get_plugin_name( $b[$orderby] ) );
 		}
 		
 		return 'asc' == $order ? $result : ( $result * -1 );
