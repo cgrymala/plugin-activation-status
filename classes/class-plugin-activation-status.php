@@ -38,11 +38,6 @@ class Plugin_Activation_Status {
 		if ( isset( $_GET['list_active_plugins'] ) && wp_verify_nonce( $_GET['_active_plugins_nonce'], 'active_plugins' ) ) {
 			$this->use_cache = false;
 		}
-		
-		if ( isset( $_POST['pas-action'] ) && wp_verify_nonce( $_POST['_pas_deactivate_plugins'], 'pas_deactivate_plugins' ) ) {
-			$this->use_cache = false;
-			$this->deactivate_plugins();
-		}
 	}
 	
 	/**
@@ -237,42 +232,29 @@ class Plugin_Activation_Status {
 	 */
 	function list_inactive_plugins() {
 		if ( $this->use_cache ) {
-			echo get_site_option( 'pas_inactive_plugins', __( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' ) );
-			return;
+			$inactive = get_site_option( 'pas_inactive_plugins', array() );
+			if ( ! is_array( $inactive ) ) {
+				$this->parse_plugins();
+			} else if ( empty( $inactive ) ) {
+				_e( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' );
+				return;
+			} else {
+				$this->inactive_plugins = $inactive;
+			}
 		}
 		
-		$tmp = array();
-		foreach ( $this->inactive_plugins as $p ) {
-			if ( array_key_exists( $p, $this->all_plugins ) )
-				$tmp[$this->all_plugins[$p]['Name']] = $p;
-			else
-				$tmp[$p] = $p;
-		}
-		ksort( $tmp );
+		if ( ! class_exists( 'WP_List_Table' ) )
+			require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
+		if ( ! class_exists( 'Plugin_Activation_Status_List_Table_Inactive' ) ) 
+			require_once( plugin_dir_path( __FILE__ ) . '/_inc/class-plugin-activation-status-list-table-inactive.php' );
 		
-		ob_start();
-?>
-    <div class="inactive-plugins plugins">
-        <ol>
-<?php
-		$ct = 0;
-		foreach ( $tmp as $p ) {
-			$url = network_admin_url( 'plugins.php' );
-			$url = wp_nonce_url( sprintf( '%5$s?action=delete-selected&amp;checked[]=%1$s&amp;plugin-status=%2$s&amp;paged=%3$s&amp;s=%4$s', $p, 'all', 1, null, $url ), 'bulk-plugins' );
-			$dellink = sprintf( ' (<a href="%s">%s</a>)', $url, __( 'Delete' ) );
-?>
-			<li class="<?php echo $ct%2 ? 'active' : 'inactive' ?>"><?php echo array_key_exists( $p, $this->all_plugins ) ? $this->all_plugins[$p]['Name'] : $p ?><?php echo $dellink ?></li>
-<?php
-			$ct++;
-		}
-?>
-	    </ol>
-        <p><small><em><?php printf( __( 'List generated on %s at %s' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) ) ?></em></small></p>
-	</div>
-<?php
-		$list = ob_get_clean();
-		update_site_option( 'pas_inactive_plugins', $list );
-		echo $list;
+		$table = new Plugin_Activation_Status_List_Table_Inactive();
+		$table->set_all_plugins( $this->all_plugins );
+		$table->set_inactive_plugins( $this->inactive_plugins );
+		$table->prepare_items( $this->inactive_plugins );
+		$table->display();
+		
+		return;
 	}
 	
 	/**
@@ -303,98 +285,6 @@ class Plugin_Activation_Status {
 		$table->display();
 		
 		return;
-		
-		$tmp = array();
-		foreach ( $this->active_plugins as $p ) {
-			if ( array_key_exists( $p, $this->all_plugins ) )
-				$tmp[$this->all_plugins[$p]['Name']] = $p;
-			else
-				$tmp[$p] = $p;
-		}
-		ksort( $tmp );
-		
-		ob_start();
-?>
-    <div class="active-plugins plugins">
-    	<table>
-        	<thead>
-            	<tr>
-                	<th><?php _e( '#' ) ?></th>
-                	<th><?php _e( 'Plugin' ) ?></th>
-                    <th><?php _e( 'Active On' ) ?></th>
-                </tr>
-            </thead>
-            <tfoot>
-            	<tr>
-                	<th><?php _e( '#' ) ?></th>
-                	<th><?php _e( 'Plugin' ) ?></th>
-                    <th><?php _e( 'Active On' ) ?></th>
-                </tr>
-            </tfoot>
-            <tbody>
-<?php
-		$i = 1;
-		foreach ( $tmp as $p ) {
-?>
-				<tr class="<?php echo $i%2 ? 'active' : 'inactive' ?>">
-                	<td><?php echo $i; $i++; ?></td>
-                	<td><?php echo array_key_exists( $p, $this->all_plugins ) ? $this->all_plugins[$p]['Name'] : $p ?></td>
-                    <td>
-<?php
-			if ( array_key_exists( $p, $this->active_on ) ) {
-				if ( array_key_exists( 'network', $this->active_on[$p] ) && ! empty( $this->active_on[$p]['network'] ) ) {
-					echo '<h4>' . __( 'Network Activated:' ) . '</h4>';
-					echo '<ul>';
-					foreach ( $this->active_on[$p]['network'] as $id => $n ) {
-						echo '<li>' . $id . '. ' . $n . '</li>';
-					}
-					echo '</ul>';
-					printf( '
-					<form method="post">
-						<p>
-							%5$s
-							<input type="hidden" name="plugin" value="%1$s"/>
-							<input type="hidden" name="pas-action" value="%2$s"/>
-							<input type="hidden" name="networks" value="%4$s"/>
-							<input type="submit" class="button" value="%3$s"/>
-						</p>
-					</form>', $p, 'deactivate-all-networks', __( 'Network Deactivate on All Networks' ), urlencode( json_encode( $this->active_on[$p]['network'] ) ), wp_nonce_field( 'pas_deactivate_plugins', '_pas_deactivate_plugins', true, false ) );
-				}
-				if ( array_key_exists( 'site', $this->active_on[$p] ) && ! empty( $this->active_on[$p]['site'] ) ) {
-					echo '<h4>' . __( 'Blog Activated:' ) . '</h4>';
-					echo '<ul>';
-					foreach ( $this->active_on[$p]['site'] as $id=>$n ) {
-						echo '<li>' . $id . '. ' . $n . '</li>';
-					}
-					echo '</ul>';
-					printf( '
-					<form method="post">
-						<p>
-							%5$s
-							<input type="hidden" name="plugin" value="%1$s"/>
-							<input type="hidden" name="pas-action" value="%2$s"/>
-							<input type="hidden" name="blogs" value="%4$s"/>
-							<input type="submit" class="button" value="%3$s"/>
-						</p>
-					</form>', $p, 'deactivate-all-blogs', __( 'Deactivate on All Sites' ), urlencode( json_encode( $this->active_on[$p]['site'] ) ), wp_nonce_field( 'pas_deactivate_plugins', '_pas_deactivate_plugins', true, false ) );
-				}
-			} else {
-				echo '<p>' . __( 'For some reason, a list of the sites and networks on which this plugin is active could not be retrieved' ) . '</p>';
-			}
-?>
-                    </td>
-                </tr>
-<?php
-		}
-?>
-            </tbody>
-        </table>
-        <p><small><em><?php printf( __( 'List generated on %s at %s' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) ) ?></em></small></p>
-    </div>
-<?php
-		$list = ob_get_clean();
-		update_site_option( 'pas_active_plugins', $list );
-		echo $list;
 	}
 	
 	/**

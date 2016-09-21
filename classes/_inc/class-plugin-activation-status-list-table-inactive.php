@@ -1,9 +1,10 @@
 <?php
 /**
- * Implements the table of status indicators
+ * Implements the table of inactive plugins
  */
-class Plugin_Activation_Status_List_Table extends WP_List_Table {
+class Plugin_Activation_Status_List_Table_Inactive extends WP_List_Table {
 	public $all_plugins = array();
+	public $inactive_plugins = array();
 	public $active_plugins = array();
 	public $active_on = array();
 	
@@ -15,29 +16,15 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 		$this->active_plugins = $plugins;
 	}
 	
+	function set_inactive_plugins( $plugins=array() ) {
+		$this->inactive_plugins = $plugins;
+	}
+	
 	function get_plugin( $key ) {
-		if ( array_key_exists( $key, $this->active_plugins ) )
-			return $this->active_plugins[$key];
+		if ( array_key_exists( $key, $this->inactive_plugins ) )
+			return $this->inactive_plugins[$key];
 		
 		return false;
-	}
-	
-	function set_active_on( $plugins=array() ) {
-		$this->active_on = $plugins;
-	}
-	
-	function get_blog_active_on( $key ) {
-		if ( array_key_exists( $key, $this->active_on ) && array_key_exists( 'site', $this->active_on[$key] ) )
-			return $this->active_on[$key]['site'];
-		
-		return array();
-	}
-	
-	function get_network_active_on( $key ) {
-		if ( array_key_exists( $key, $this->active_on ) && array_key_exists( 'network', $this->active_on[$key] ) )
-			return $this->active_on[$key]['network'];
-		
-		return array();
 	}
 	
 	function get_plugin_name( $key ) {
@@ -48,23 +35,21 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 	}
 	
 	function get_columns() {
-		return apply_filters( 'plugin-activation-status-list-table-columns', array(
+		return apply_filters( 'plugin-activation-status-list-table-inactive-columns', array(
 			'cb'             => '<input type="checkbox"/>', 
 			'plugin-name'    => __( 'Plugin Name', 'plugin-activation-status' ), 
-			'network-active' => __( 'Network Activated On', 'plugin-activation-status' ), 
-			'blog-active'    => __( 'Blog Activated On', 'plugin-activation-status' ), 
 			'raw'            => __( 'Raw Plugin Data', 'plugin-activation-status' ), 
 		) );
 	}
 	
 	function get_hidden_columns() {
-		return apply_filters( 'plugin-activation-status-list-table-hidden', array(
+		return apply_filters( 'plugin-activation-status-list-table-inactive-hidden', array(
 			'raw', 
 		) );
 	}
 	
 	function get_sortable_columns() {
-		return apply_filters( 'plugin-activation-status-list-table-sortable', array(
+		return apply_filters( 'plugin-activation-status-list-table-inactive-sortable', array(
 			'name' => array( 'name', false )
 		) );
 	}
@@ -78,20 +63,17 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 	}
 	
 	function get_bulk_actions() {
-		return apply_filters( 'plugin-activation-status-list-table-bulk-actions', array(
-			'network-deactivate' => __( 'Deactivate on All Networks', 'plugin-activation-status' ), 
-			'blog-deactivate'    => __( 'Deactivate on All Sites', 'plugin-activation-status' ), 
+		return apply_filters( 'plugin-activation-status-list-table-inactive-bulk-actions', array(
+			'delete'             => __( 'Delete Plugin Files', 'plugin-activation-status' )
 		) );
 	}
 	
 	function prepare_items( $plugins=array() ) {
 		$this->_column_headers = $this->get_column_info();
 		$this->items = array();
-		foreach ( $this->active_on as $k=>$v ) {
+		foreach ( $plugins as $k=>$v ) {
 			$this->items[] = array(
 				'plugin-name'    => $this->get_plugin_name( $k ), 
-				'network-active' => $this->get_network_active_on( $k ), 
-				'blog-active'    => $this->get_blog_active_on( $k ), 
 			);
 		}
 		usort( $this->items, array( &$this, 'usort_reorder' ) );
@@ -108,15 +90,6 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 			case 'raw' : 
 				return sprintf( '<pre><code>%s</code></pre>', print_r( $item, true ) );
 				break;
-			case 'network-active' : 
-			case 'blog-active' : 
-				$rt = '<ul class="pas-site-list" style="list-style: none;">';
-				foreach ( $item[$column_name] as $site_id=>$site_name ) {
-					$rt .= sprintf( '<li>%d. %s</li>', $site_id, $site_name );
-				}
-				$rt .= '</ul>';
-				return $rt;
-				break;
 			default : 
 				return esc_attr( $item[$column_name] );
 				break;
@@ -124,10 +97,8 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 	}
 	
 	function process_bulk_action() {
-		if ( 'blog-deactivate' == $this->current_action() ) {
-			wp_die( 'This is where we would normally deactivate a bunch of plugins across all blogs' );
-		} else if ( 'network-deactivate' == $this->current_action() ) {
-			wp_die( 'This is where we would normally network-deactivate the selected plugins' );
+		if ( 'delete' == $this->current_action() ) {
+			wp_die( 'This is where we would delete the selected plugins' );
 		}
 	}
 	
