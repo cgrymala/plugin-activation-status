@@ -281,9 +281,13 @@ class Plugin_Activation_Status {
 	function list_active_plugins() {
 		if ( $this->use_cache ) {
 			$tmp = get_site_option( 'pas_active_plugins', array( 'all_plugins' => array(), 'active_plugins' => array(), 'active_on' => array() ) );
-			$this->all_plugins = $tmp['all_plugins'];
-			$this->active_plugins = $tmp['active_plugins'];
-			$this->active_on = $tmp['active_on'];
+			if ( is_array( $tmp ) ) {
+				$this->all_plugins = $tmp['all_plugins'];
+				$this->active_plugins = $tmp['active_plugins'];
+				$this->active_on = $tmp['active_on'];
+			} else {
+				$this->parse_plugins();
+			}
 		}
 		
 		if ( ! class_exists( 'WP_List_Table' ) )
