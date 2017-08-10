@@ -67,7 +67,7 @@ class Plugin_Activation_Status {
 			$main_network_id = $wpdb->get_var( "SELECT id FROM {$wpdb->site} ORDER BY id ASC LIMIT 1" );
 		}
 
-		return intval( $main_network_id ) === intval( $GLOBALS['site_id'] ) );
+		return intval( $main_network_id ) === intval( $GLOBALS['site_id'] );
     }
 	
 	/**
