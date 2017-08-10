@@ -73,6 +73,7 @@ class Plugin_Activation_Status_List_Table_Inactive extends WP_List_Table {
 		$this->items = array();
 		foreach ( $plugins as $k=>$v ) {
 			$this->items[] = array(
+				'inactive-plugin-slug'    => $v,
 				'inactive-plugin-name'    => $this->get_plugin_name( $v ), 
 			);
 		}
@@ -84,7 +85,7 @@ class Plugin_Activation_Status_List_Table_Inactive extends WP_List_Table {
 	}
 	
 	function column_cb( $item ) {
-		return sprintf( '<input type="checkbox" name="pas_plugin_bulk_actions_inactive[]" value="%s"/>', esc_attr( $item['plugin-name'] ) );
+		return sprintf( '<input type="checkbox" name="pas_plugin_bulk_actions_inactive[]" value="%s"/>', esc_attr( $item['inactive-plugin-slug'] ) );
 	}
 	
 	function column_default( $item, $column_name=null ) {
@@ -97,10 +98,21 @@ class Plugin_Activation_Status_List_Table_Inactive extends WP_List_Table {
 				break;
 		}
 	}
-	
+
+	/**
+	 * Perform the appropriate bulk action
+	 * @TODO Figure out how to reload the table data after plugins are deleted
+	 *
+	 * @return void
+	 */
 	function process_bulk_action() {
-		if ( 'delete-inactive' == $this->current_action() ) {
-			wp_die( 'This is where we would delete the selected plugins' );
+		if ( 'delete' == $this->current_action() ) {
+			delete_plugins( $_POST['pas_plugin_bulk_actions_inactive'] );
+			$url = network_admin_url( 'plugins.php' );
+			$url = add_query_arg( 'page', 'all_active_plugins', $url );
+			$url = add_query_arg( 'list_active_plugins', '1', $url );
+			$url = wp_nonce_url( 'active_plugins', '_active_plugins_nonce', $url );
+			wp_safe_redirect( $url );
 		}
 	}
 	

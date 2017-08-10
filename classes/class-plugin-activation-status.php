@@ -29,9 +29,11 @@ class Plugin_Activation_Status {
 	 * @uses add_action() to enqueue the plugin's styles on the admin_print_styles hook
 	 */
 	function __construct() {
-		if ( ! is_multisite() || false === $this->is_main_network() || ! current_user_can( 'delete_plugins' ) )
+		if ( ! is_multisite() || false === $this->is_main_network() || ! current_user_can( 'delete_plugins' ) ) {
+		    error_log( '[Plugin Activation Status]: We bailed out before registering the admin menu for some reason' );
 			return;
-		
+        }
+
 		add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'add_meta_boxes' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -43,16 +45,17 @@ class Plugin_Activation_Status {
 
 	/**
 	 * Test to see if this is the main network in a multi-network install
-     *
-     * @uses is_main_network() if that function exists
-     * @access private
-     * @since  1.1.1
-     * @return bool whether this is the primary network or not
+	 *
+	 * @uses is_main_network() if that function exists
+	 * @access private
+	 * @since  1.1.1
+	 * @return bool whether this is the primary network or not
 	 */
 	private function is_main_network() {
-	    if ( function_exists( 'is_main_network' ) ) {
-	        return is_main_network();
-        }
+		if ( function_exists( 'is_main_network' ) ) {
+			$rt = is_main_network();
+			return $rt;
+		}
 
 		if ( defined( 'PRIMARY_NETWORK_ID' ) ) {
 			$main_network_id = PRIMARY_NETWORK_ID;
@@ -67,8 +70,8 @@ class Plugin_Activation_Status {
 			$main_network_id = $wpdb->get_var( "SELECT id FROM {$wpdb->site} ORDER BY id ASC LIMIT 1" );
 		}
 
-		return intval( $main_network_id ) === intval( $GLOBALS['site_id'] );
-    }
+		return ( intval( $main_network_id ) === intval( $GLOBALS['site_id'] ) );
+	}
 	
 	/**
 	 * Enqueue any scripts and styles that the plugin needs
@@ -88,7 +91,7 @@ class Plugin_Activation_Status {
 	 * @uses add_submenu_page()
 	 */
 	function admin_menu() {
-		if ( ! is_multisite() || 1 !== intval( $GLOBALS['site_id'] ) )
+		if ( ! is_multisite() || false === $this->is_main_network() )
 			return;
 		
 		add_submenu_page( 'plugins.php', __( 'Locate Active Plugins' ), __( 'Active Plugins' ), 'delete_plugins', 'all_active_plugins', array( $this, 'submenu_page' ) );
@@ -102,17 +105,17 @@ class Plugin_Activation_Status {
 ?>
 <div id="poststuff" class="wrap metabox-holder">
 	<h2><?php _e( 'Locate Active Plugins' ) ?></h2>
-    <p><?php _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.' ) ?></p>
+	<p><?php _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.' ) ?></p>
 <?php
 		if ( $this->use_cache ) {
 			printf( __( '<p>If you have generated this list before, the most recent version should be displayed below. The date/time each list was generated is included within the list. Keep in mind that the dates/times included are your server\'s date/time and may not reflect your local date/time. The current date/time on your server is %2$s %3$s.</p><p>If you would like to generate a new list with your current data, please press the "%1$s" button below.</p>' ), __( 'Continue' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) );
 ?>
-    <form action="">
-    	<input type="hidden" name="page" value="all_active_plugins"/>
-        <?php wp_nonce_field( 'active_plugins', '_active_plugins_nonce' ) ?>
-        <input type="hidden" name="list_active_plugins" value="1"/>
-        <p><input type="submit" class="button button-primary" value="<?php _e( 'Continue' ) ?>"/></p>
-    </form>
+	<form action="">
+		<input type="hidden" name="page" value="all_active_plugins"/>
+		<?php wp_nonce_field( 'active_plugins', '_active_plugins_nonce' ) ?>
+		<input type="hidden" name="list_active_plugins" value="1"/>
+		<p><input type="submit" class="button button-primary" value="<?php _e( 'Continue' ) ?>"/></p>
+	</form>
 <?php
 		}
 		
