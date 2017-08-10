@@ -2,7 +2,7 @@
 /**
  * Define the Plugin_Activation_Status class
  * @package Plugin Activation Status
- * @version 1.1
+ * @version 1.1.1
  */
 
 class Plugin_Activation_Status {
@@ -13,6 +13,7 @@ class Plugin_Activation_Status {
 	var $blogs = array();
 	var $sites = array();
 	var $use_cache = true;
+	var $version = '1.1.1';
 	
 	/**
 	 * Construct our Plugin_Activation_Status object
@@ -28,7 +29,7 @@ class Plugin_Activation_Status {
 	 * @uses add_action() to enqueue the plugin's styles on the admin_print_styles hook
 	 */
 	function __construct() {
-		if ( ! is_multisite() || 1 !== intval( $GLOBALS['site_id'] ) || ! current_user_can( 'delete_plugins' ) )
+		if ( ! is_multisite() || false === $this->is_main_network() || ! current_user_can( 'delete_plugins' ) )
 			return;
 		
 		add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
@@ -39,6 +40,35 @@ class Plugin_Activation_Status {
 			$this->use_cache = false;
 		}
 	}
+
+	/**
+	 * Test to see if this is the main network in a multi-network install
+     *
+     * @uses is_main_network() if that function exists
+     * @access private
+     * @since  1.1.1
+     * @return bool whether this is the primary network or not
+	 */
+	private function is_main_network() {
+	    if ( function_exists( 'is_main_network' ) ) {
+	        return is_main_network();
+        }
+
+		if ( defined( 'PRIMARY_NETWORK_ID' ) ) {
+			$main_network_id = PRIMARY_NETWORK_ID;
+		} else if ( isset( $GLOBALS['site_id'] ) && 1 === (int) $GLOBALS['site_id'] ) {
+			// If the current network has an ID of 1, assume it is the main network.
+			$main_network_id = 1;
+		} else if ( function_exists( 'get_networks' ) ) {
+			$_networks = get_networks( array( 'fields' => 'ids', 'number' => 1 ) );
+			$main_network_id = array_shift( $_networks );
+		} else {
+			global $wpdb;
+			$main_network_id = $wpdb->get_var( "SELECT id FROM {$wpdb->site} ORDER BY id ASC LIMIT 1" );
+		}
+
+		return intval( $main_network_id ) === intval( $GLOBALS['site_id'] ) );
+    }
 	
 	/**
 	 * Enqueue any scripts and styles that the plugin needs

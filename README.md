@@ -7,9 +7,9 @@
 
 **Requires at least:** 3.8
 
-**Tested up to:** 4.3
+**Tested up to:** 4.8.1
 
-**Stable tag:** 1.0.1
+**Stable tag:** 1.1.1
 
 **License:** GPLv2 or later
 
@@ -68,6 +68,9 @@ To make a long story short (too late!), those are plugins that are still conside
 
 
 ## Changelog ##
+
+### 1.1.1 ###
+* Implement better method to test for main network
 
 ### 1.1 ###
 * Reorganize files within plugin folder
