@@ -28,7 +28,7 @@ class Plugin_Activation_Status {
 	 * @uses add_action() to enqueue the plugin's styles on the admin_print_styles hook
 	 */
 	function __construct() {
-		if ( ! is_multisite() || 1 !== intval( $GLOBALS['site_id'] ) || ! current_user_can( 'delete_plugins' ) )
+		if ( ! is_multisite() || ! is_main_network() || ! current_user_can( 'delete_plugins' ) )
 			return;
 		
 		add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
@@ -152,7 +152,7 @@ class Plugin_Activation_Status {
 			$v = maybe_unserialize( $val->meta_value );
 			if ( ! is_array( $v ) )
 				continue;
-			if ( count( v ) <= 0 )
+			if ( count( $v ) <= 0 )
 				continue;
 			
 			$tmp = array_values( $v );

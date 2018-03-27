@@ -7,9 +7,9 @@
 
 **Requires at least:** 3.8
 
-**Tested up to:** 4.3
+**Tested up to:** 4.9.4
 
-**Stable tag:** 1.0.1
+**Stable tag:** 1.0.2
 
 **License:** GPLv2 or later
 
@@ -48,7 +48,7 @@ When the plugin generates the lists of plugins, it stores those lists as site op
 
 ### Why don't I see the new Plugins -> Active Plugins menu item? ###
 
-That menu item will only appear in the Network Admin area for the network with an ID of 1. If you are running a multi-network installation and you activated the plugin on a network other than the first, you won't see that menu item.
+That menu item will only appear in the Network Admin area for the primary (root/main) network. If you are running a multi-network installation and you activated the plugin on a network other than the first, you won't see that menu item.
 
 ### Will this work on a non-multisite installation? ###
 
@@ -69,6 +69,12 @@ To make a long story short (too late!), those are plugins that are still conside
 
 
 ## Changelog ##
+
+### 1.0.2 ###
+* Tested compatibility with WordPress 4.9.x
+* Fixes undefined constant warning as pointed out by [@chenryahts](https://wordpress.org/support/topic/use-of-undefined-constant-missing-character/)
+* Fixes undefined index warning as pointed out by [@cliffpaulick](https://wordpress.org/support/topic/wp_debug-php-notice-undefined-index-site_id/)
+* Begins adding compatibility with core implementation of multi-network (uses the [`is_main_network()` function](https://developer.wordpress.org/reference/functions/is_main_network/))
 
 ### 1.0 ###
 * Tested compatibility with WordPress 4.0
