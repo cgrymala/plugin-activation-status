@@ -2,7 +2,7 @@
 /**
  * Define the Plugin_Activation_Status class
  * @package Plugin Activation Status
- * @version 1.1.1
+ * @version 1.0.1
  */
 
 class Plugin_Activation_Status {
@@ -13,7 +13,6 @@ class Plugin_Activation_Status {
 	var $blogs = array();
 	var $sites = array();
 	var $use_cache = true;
-	var $version = '1.1.1';
 	
 	/**
 	 * Construct our Plugin_Activation_Status object
@@ -29,11 +28,9 @@ class Plugin_Activation_Status {
 	 * @uses add_action() to enqueue the plugin's styles on the admin_print_styles hook
 	 */
 	function __construct() {
-		if ( ! is_multisite() || false === $this->is_main_network() || ! current_user_can( 'delete_plugins' ) ) {
-		    error_log( '[Plugin Activation Status]: We bailed out before registering the admin menu for some reason' );
+		if ( ! is_multisite() || 1 !== intval( $GLOBALS['site_id'] ) || ! current_user_can( 'delete_plugins' ) )
 			return;
-        }
-
+		
 		add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'add_meta_boxes' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -41,36 +38,11 @@ class Plugin_Activation_Status {
 		if ( isset( $_GET['list_active_plugins'] ) && wp_verify_nonce( $_GET['_active_plugins_nonce'], 'active_plugins' ) ) {
 			$this->use_cache = false;
 		}
-	}
-
-	/**
-	 * Test to see if this is the main network in a multi-network install
-	 *
-	 * @uses is_main_network() if that function exists
-	 * @access private
-	 * @since  1.1.1
-	 * @return bool whether this is the primary network or not
-	 */
-	private function is_main_network() {
-		if ( function_exists( 'is_main_network' ) ) {
-			$rt = is_main_network();
-			return $rt;
+		
+		if ( isset( $_POST['pas-action'] ) && wp_verify_nonce( $_POST['_pas_deactivate_plugins'], 'pas_deactivate_plugins' ) ) {
+			$this->use_cache = false;
+			$this->deactivate_plugins();
 		}
-
-		if ( defined( 'PRIMARY_NETWORK_ID' ) ) {
-			$main_network_id = PRIMARY_NETWORK_ID;
-		} else if ( isset( $GLOBALS['site_id'] ) && 1 === (int) $GLOBALS['site_id'] ) {
-			// If the current network has an ID of 1, assume it is the main network.
-			$main_network_id = 1;
-		} else if ( function_exists( 'get_networks' ) ) {
-			$_networks = get_networks( array( 'fields' => 'ids', 'number' => 1 ) );
-			$main_network_id = array_shift( $_networks );
-		} else {
-			global $wpdb;
-			$main_network_id = $wpdb->get_var( "SELECT id FROM {$wpdb->site} ORDER BY id ASC LIMIT 1" );
-		}
-
-		return ( intval( $main_network_id ) === intval( $GLOBALS['site_id'] ) );
 	}
 	
 	/**
@@ -81,7 +53,7 @@ class Plugin_Activation_Status {
 	function enqueue_scripts() {
 		/*print( "\n<!-- CSS File Location: " . plugins_url( 'plugin-activation-status.css', __FILE__ ) . " -->\n" );*/
 		if ( isset( $_GET['page'] ) && 'all_active_plugins' == $_GET['page'] ) {
-			wp_enqueue_style( 'plugin-activation-status', plugins_url( '/styles/plugin-activation-status.css', dirname( __FILE__ ) ), array( 'colors' ), '1.0.1', 'all' );
+			wp_enqueue_style( 'plugin-activation-status', plugins_url( 'plugin-activation-status.css', __FILE__ ), array( 'colors' ), '0.2.3', 'all' );
 			wp_enqueue_script( 'post' );
 		}
 	}
@@ -91,7 +63,7 @@ class Plugin_Activation_Status {
 	 * @uses add_submenu_page()
 	 */
 	function admin_menu() {
-		if ( ! is_multisite() || false === $this->is_main_network() )
+		if ( ! is_multisite() || 1 !== intval( $GLOBALS['site_id'] ) )
 			return;
 		
 		add_submenu_page( 'plugins.php', __( 'Locate Active Plugins' ), __( 'Active Plugins' ), 'delete_plugins', 'all_active_plugins', array( $this, 'submenu_page' ) );
@@ -105,17 +77,17 @@ class Plugin_Activation_Status {
 ?>
 <div id="poststuff" class="wrap metabox-holder">
 	<h2><?php _e( 'Locate Active Plugins' ) ?></h2>
-	<p><?php _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.' ) ?></p>
+    <p><?php _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.' ) ?></p>
 <?php
 		if ( $this->use_cache ) {
 			printf( __( '<p>If you have generated this list before, the most recent version should be displayed below. The date/time each list was generated is included within the list. Keep in mind that the dates/times included are your server\'s date/time and may not reflect your local date/time. The current date/time on your server is %2$s %3$s.</p><p>If you would like to generate a new list with your current data, please press the "%1$s" button below.</p>' ), __( 'Continue' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) );
 ?>
-	<form action="">
-		<input type="hidden" name="page" value="all_active_plugins"/>
-		<?php wp_nonce_field( 'active_plugins', '_active_plugins_nonce' ) ?>
-		<input type="hidden" name="list_active_plugins" value="1"/>
-		<p><input type="submit" class="button button-primary" value="<?php _e( 'Continue' ) ?>"/></p>
-	</form>
+    <form action="">
+    	<input type="hidden" name="page" value="all_active_plugins"/>
+        <?php wp_nonce_field( 'active_plugins', '_active_plugins_nonce' ) ?>
+        <input type="hidden" name="list_active_plugins" value="1"/>
+        <p><input type="submit" class="button button-primary" value="<?php _e( 'Continue' ) ?>"/></p>
+    </form>
 <?php
 		}
 		
@@ -237,13 +209,6 @@ class Plugin_Activation_Status {
 			if ( ! in_array( $k, $this->active_plugins ) )
 				$this->inactive_plugins[] = $k;
 		}
-		
-		update_site_option( 'pas_active_plugins', array( 
-			'all_plugins'      => $this->all_plugins, 
-			'active_plugins'   => $this->active_plugins, 
-			'active_on'        => $this->active_on, 
-			'inactive_plugins' => $this->inactive_plugins 
-		) );
 	}
 	
 	/**
@@ -265,33 +230,42 @@ class Plugin_Activation_Status {
 	 */
 	function list_inactive_plugins() {
 		if ( $this->use_cache ) {
-			$inactive = get_site_option( 'pas_inactive_plugins', array() );
-			if ( ! is_array( $inactive ) ) {
-				$this->parse_plugins();
-			} else if ( empty( $inactive ) ) {
-				_e( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' );
-				return;
-			} else {
-				$this->inactive_plugins = $inactive;
-			}
+			echo get_site_option( 'pas_inactive_plugins', __( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' ) );
+			return;
 		}
 		
-		if ( ! class_exists( 'WP_List_Table' ) )
-			require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
-		if ( ! class_exists( 'Plugin_Activation_Status_List_Table_Inactive' ) ) 
-			require_once( plugin_dir_path( __FILE__ ) . '/_inc/class-plugin-activation-status-list-table-inactive.php' );
+		$tmp = array();
+		foreach ( $this->inactive_plugins as $p ) {
+			if ( array_key_exists( $p, $this->all_plugins ) )
+				$tmp[$this->all_plugins[$p]['Name']] = $p;
+			else
+				$tmp[$p] = $p;
+		}
+		ksort( $tmp );
 		
-		$table = new Plugin_Activation_Status_List_Table_Inactive();
-		$table->set_all_plugins( $this->all_plugins );
-		$table->set_inactive_plugins( $this->inactive_plugins );
-		$table->prepare_items( $this->inactive_plugins );
-		
-		echo '<form id="inactive-plugin-list-table" method="post">';
-		echo '<input type="hidden" name="page" value="' . $_REQUEST['page'] . '" />';
-		$table->display();
-		echo '</form>';
-		
-		return;
+		ob_start();
+?>
+    <div class="inactive-plugins plugins">
+        <ol>
+<?php
+		$ct = 0;
+		foreach ( $tmp as $p ) {
+			$url = network_admin_url( 'plugins.php' );
+			$url = wp_nonce_url( sprintf( '%5$s?action=delete-selected&amp;checked[]=%1$s&amp;plugin-status=%2$s&amp;paged=%3$s&amp;s=%4$s', $p, 'all', 1, null, $url ), 'bulk-plugins' );
+			$dellink = sprintf( ' (<a href="%s">%s</a>)', $url, __( 'Delete' ) );
+?>
+			<li class="<?php echo $ct%2 ? 'active' : 'inactive' ?>"><?php echo array_key_exists( $p, $this->all_plugins ) ? $this->all_plugins[$p]['Name'] : $p ?><?php echo $dellink ?></li>
+<?php
+			$ct++;
+		}
+?>
+	    </ol>
+        <p><small><em><?php printf( __( 'List generated on %s at %s' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) ) ?></em></small></p>
+	</div>
+<?php
+		$list = ob_get_clean();
+		update_site_option( 'pas_inactive_plugins', $list );
+		echo $list;
 	}
 	
 	/**
@@ -299,33 +273,101 @@ class Plugin_Activation_Status {
 	 */
 	function list_active_plugins() {
 		if ( $this->use_cache ) {
-			$tmp = get_site_option( 'pas_active_plugins', array( 'all_plugins' => array(), 'active_plugins' => array(), 'active_on' => array() ) );
-			if ( is_array( $tmp ) ) {
-				$this->all_plugins = $tmp['all_plugins'];
-				$this->active_plugins = $tmp['active_plugins'];
-				$this->active_on = $tmp['active_on'];
-			} else {
-				$this->parse_plugins();
-			}
+			echo get_site_option( 'pas_active_plugins', __( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' ) );
+			return;
 		}
 		
-		if ( ! class_exists( 'WP_List_Table' ) )
-			require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
-		if ( ! class_exists( 'Plugin_Activation_Status_List_Table' ) ) 
-			require_once( plugin_dir_path( __FILE__ ) . '/_inc/class-plugin-activation-status-list-table.php' );
+		$tmp = array();
+		foreach ( $this->active_plugins as $p ) {
+			if ( array_key_exists( $p, $this->all_plugins ) )
+				$tmp[$this->all_plugins[$p]['Name']] = $p;
+			else
+				$tmp[$p] = $p;
+		}
+		ksort( $tmp );
 		
-		$table = new Plugin_Activation_Status_List_Table();
-		$table->set_all_plugins( $this->all_plugins );
-		$table->set_active_plugins( $this->active_plugins );
-		$table->set_active_on( $this->active_on );
-		$table->prepare_items( $this->active_plugins );
-		
-		echo '<form id="active-plugin-list-table" method="post">';
-		echo '<input type="hidden" name="page" value="' . $_REQUEST['page'] . '" />';
-		$table->display();
-		echo '</form>';
-		
-		return;
+		ob_start();
+?>
+    <div class="active-plugins plugins">
+    	<table>
+        	<thead>
+            	<tr>
+                	<th><?php _e( '#' ) ?></th>
+                	<th><?php _e( 'Plugin' ) ?></th>
+                    <th><?php _e( 'Active On' ) ?></th>
+                </tr>
+            </thead>
+            <tfoot>
+            	<tr>
+                	<th><?php _e( '#' ) ?></th>
+                	<th><?php _e( 'Plugin' ) ?></th>
+                    <th><?php _e( 'Active On' ) ?></th>
+                </tr>
+            </tfoot>
+            <tbody>
+<?php
+		$i = 1;
+		foreach ( $tmp as $p ) {
+?>
+				<tr class="<?php echo $i%2 ? 'active' : 'inactive' ?>">
+                	<td><?php echo $i; $i++; ?></td>
+                	<td><?php echo array_key_exists( $p, $this->all_plugins ) ? $this->all_plugins[$p]['Name'] : $p ?></td>
+                    <td>
+<?php
+			if ( array_key_exists( $p, $this->active_on ) ) {
+				if ( array_key_exists( 'network', $this->active_on[$p] ) && ! empty( $this->active_on[$p]['network'] ) ) {
+					echo '<h4>' . __( 'Network Activated:' ) . '</h4>';
+					echo '<ul>';
+					foreach ( $this->active_on[$p]['network'] as $id => $n ) {
+						echo '<li>' . $id . '. ' . $n . '</li>';
+					}
+					echo '</ul>';
+					printf( '
+					<form method="post">
+						<p>
+							%5$s
+							<input type="hidden" name="plugin" value="%1$s"/>
+							<input type="hidden" name="pas-action" value="%2$s"/>
+							<input type="hidden" name="networks" value="%4$s"/>
+							<input type="submit" class="button" value="%3$s"/>
+						</p>
+					</form>', $p, 'deactivate-all-networks', __( 'Network Deactivate on All Networks' ), urlencode( json_encode( $this->active_on[$p]['network'] ) ), wp_nonce_field( 'pas_deactivate_plugins', '_pas_deactivate_plugins', true, false ) );
+				}
+				if ( array_key_exists( 'site', $this->active_on[$p] ) && ! empty( $this->active_on[$p]['site'] ) ) {
+					echo '<h4>' . __( 'Blog Activated:' ) . '</h4>';
+					echo '<ul>';
+					foreach ( $this->active_on[$p]['site'] as $id=>$n ) {
+						echo '<li>' . $id . '. ' . $n . '</li>';
+					}
+					echo '</ul>';
+					printf( '
+					<form method="post">
+						<p>
+							%5$s
+							<input type="hidden" name="plugin" value="%1$s"/>
+							<input type="hidden" name="pas-action" value="%2$s"/>
+							<input type="hidden" name="blogs" value="%4$s"/>
+							<input type="submit" class="button" value="%3$s"/>
+						</p>
+					</form>', $p, 'deactivate-all-blogs', __( 'Deactivate on All Sites' ), urlencode( json_encode( $this->active_on[$p]['site'] ) ), wp_nonce_field( 'pas_deactivate_plugins', '_pas_deactivate_plugins', true, false ) );
+				}
+			} else {
+				echo '<p>' . __( 'For some reason, a list of the sites and networks on which this plugin is active could not be retrieved' ) . '</p>';
+			}
+?>
+                    </td>
+                </tr>
+<?php
+		}
+?>
+            </tbody>
+        </table>
+        <p><small><em><?php printf( __( 'List generated on %s at %s' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) ) ?></em></small></p>
+    </div>
+<?php
+		$list = ob_get_clean();
+		update_site_option( 'pas_active_plugins', $list );
+		echo $list;
 	}
 	
 	/**
