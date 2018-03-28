@@ -9,7 +9,7 @@
 
 **Tested up to:** 4.9.4
 
-**Stable tag:** 1.0.2
+**Stable tag:** 1.0.2.1
 
 **License:** GPLv2 or later
 
@@ -70,6 +70,9 @@ To make a long story short (too late!), those are plugins that are still conside
 
 ## Changelog ##
 
+### 1.0.2.1 ###
+* Adds i18n and l10n features
+
 ### 1.0.2 ###
 * Tested compatibility with WordPress 4.9.x
 * Fixes undefined constant warning as pointed out by [@chenryahts](https://wordpress.org/support/topic/use-of-undefined-constant-missing-character/)
@@ -93,6 +96,9 @@ To make a long story short (too late!), those are plugins that are still conside
 * First beta release of "UMW Plugin Locator"
 
 ## Upgrade Notice ##
+
+### 1.0.2.1 ###
+Adds i18n and l10n features
 
 ### 1.0 ###
 This version adds the ability to deactivate any active plugins and delete any inactive plugins.

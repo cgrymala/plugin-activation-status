@@ -4,7 +4,7 @@ Donate link: http://giving.umw.edu/
 Tags: plugins, multisite, multi-network, active, network-active, status
 Requires at least: 3.8
 Tested up to: 4.9.4
-Stable tag: 1.0.2
+Stable tag: 1.0.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,9 @@ To make a long story short (too late!), those are plugins that are still conside
 
 == Changelog ==
 
+= 1.0.2.1 =
+* Adds i18n and l10n features
+
 = 1.0.2 =
 * Tested compatibility with WordPress 4.9.x
 * Fixes undefined constant warning as pointed out by [@chenryahts](https://wordpress.org/support/topic/use-of-undefined-constant-missing-character/)
@@ -81,6 +84,9 @@ To make a long story short (too late!), those are plugins that are still conside
 * First beta release of "UMW Plugin Locator"
 
 == Upgrade Notice ==
+
+= 1.0.2.1 =
+Adds i18n and l10n features
 
 = 1.0.2 =
 Bug-fixes for PHP undefined constant/index warnings; begins adding compatibility with core multi-network functions
