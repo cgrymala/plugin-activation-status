@@ -30,6 +30,8 @@ class Plugin_Activation_Status {
 	function __construct() {
 		if ( ! is_multisite() || ! is_main_network() || ! current_user_can( 'delete_plugins' ) )
 			return;
+
+		add_action( 'init', array( $this, 'load_textdomain' ) );
 		
 		add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'add_meta_boxes' ) );
@@ -44,6 +46,17 @@ class Plugin_Activation_Status {
 			$this->deactivate_plugins();
 		}
 	}
+
+	/**
+	 * Initiate the plugin text domain
+     *
+     * @access public
+     * @since  1.0.2.1
+     * @return bool
+	 */
+	public function load_textdomain() {
+	    load_plugin_textdomain( 'plugin-activation-status', false, dirname( plugin_basename( __FILE__ ) ) . '/lang' );
+    }
 	
 	/**
 	 * Enqueue any scripts and styles that the plugin needs

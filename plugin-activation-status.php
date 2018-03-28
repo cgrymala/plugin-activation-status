@@ -7,6 +7,8 @@ Author: Curtiss Grymala
 Author URI: http://www.umw.edu/
 License: GPL2
 Network: true
+Text Domain: plugin-activation-status
+Domain Path: /lang
 */
 
 if ( ! class_exists( 'Plugin_Activation_Status' ) ) {
