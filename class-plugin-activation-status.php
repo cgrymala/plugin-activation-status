@@ -66,7 +66,7 @@ class Plugin_Activation_Status {
 		if ( ! is_multisite() || 1 !== intval( $GLOBALS['site_id'] ) )
 			return;
 		
-		add_submenu_page( 'plugins.php', __( 'Locate Active Plugins' ), __( 'Active Plugins' ), 'delete_plugins', 'all_active_plugins', array( $this, 'submenu_page' ) );
+		add_submenu_page( 'plugins.php', __( 'Locate Active Plugins', 'plugin-activation-status' ), __( 'Active Plugins', 'plugin-activation-status' ), 'delete_plugins', 'all_active_plugins', array( $this, 'submenu_page' ) );
 	}
 	
 	/**
@@ -76,17 +76,31 @@ class Plugin_Activation_Status {
 	function submenu_page() {
 ?>
 <div id="poststuff" class="wrap metabox-holder">
-	<h2><?php _e( 'Locate Active Plugins' ) ?></h2>
-    <p><?php _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.' ) ?></p>
+	<h2><?php _e( 'Locate Active Plugins', 'plugin-activation-status' ) ?></h2>
+    <p><?php
+        _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. ', 'plugin-activation-status' );
+        _e( 'This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.', 'plugin-activation-status' );
+        ?></p>
 <?php
 		if ( $this->use_cache ) {
-			printf( __( '<p>If you have generated this list before, the most recent version should be displayed below. The date/time each list was generated is included within the list. Keep in mind that the dates/times included are your server\'s date/time and may not reflect your local date/time. The current date/time on your server is %2$s %3$s.</p><p>If you would like to generate a new list with your current data, please press the "%1$s" button below.</p>' ), __( 'Continue' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) );
+		    $message_text = '<p>';
+		    $message_text .= __( 'If you have generated this list before, the most recent version should be displayed below.', 'plugin-activation-status' );
+		    $message_text .= ' ' . __( 'The date/time each list was generated is included within the list.', 'plugin-activation-status' );
+		    $message_text .= ' ' . __( 'Keep in mind that the dates/times included are your server\'s date/time and may not reflect your local date/time.', 'plugin-activation-status' );
+		    $message_text .= ' ' . __( 'The current date/time on your server is %1$s %2$s.', 'plugin-activation-status' );
+		    $message_text .= '</p>';
+		    $message_text .= '<p>';
+		    $message_text .= __( 'If you would like to generate a new list with your current data, please press the "%1$s" button below.', 'plugin-activation-status' );
+		    $message_text .= '</p>';
+
+			printf( $message_text, __( 'Continue', 'plugin-activation-status' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) );
+
 ?>
     <form action="">
     	<input type="hidden" name="page" value="all_active_plugins"/>
         <?php wp_nonce_field( 'active_plugins', '_active_plugins_nonce' ) ?>
         <input type="hidden" name="list_active_plugins" value="1"/>
-        <p><input type="submit" class="button button-primary" value="<?php _e( 'Continue' ) ?>"/></p>
+        <p><input type="submit" class="button button-primary" value="<?php _e( 'Continue', 'plugin-activation-status' ) ?>"/></p>
     </form>
 <?php
 		}
@@ -103,8 +117,8 @@ class Plugin_Activation_Status {
 	 * @uses add_meta_box() to register those meta boxes
 	 */
 	function add_meta_boxes() {
-		add_meta_box( 'inactive_plugins', __( 'Inactive Plugins' ), array( $this, 'inactive_plugins_metabox' ), 'all_active_plugins' );
-		add_meta_box( 'active_plugins', __( 'Active Plugins' ), array( $this, 'active_plugins_metabox' ), 'all_active_plugins' );
+		add_meta_box( 'inactive_plugins', __( 'Inactive Plugins', 'plugin-activation-status' ), array( $this, 'inactive_plugins_metabox' ), 'all_active_plugins' );
+		add_meta_box( 'active_plugins', __( 'Active Plugins', 'plugin-activation-status' ), array( $this, 'active_plugins_metabox' ), 'all_active_plugins' );
 	}
 	
 	/**
@@ -121,7 +135,7 @@ class Plugin_Activation_Status {
 	 */
 	function list_plugins() {
 		if ( ! function_exists( 'get_plugins' ) ) {
-			_e( '<p>There was an error retrieving the list of plugins. The get_plugins() function does not seem to exist.</p>' );
+			_e( '<p>There was an error retrieving the list of plugins. The get_plugins() function does not seem to exist.</p>', 'plugin-activation-status' );
 			return;
 		}
 		
@@ -224,13 +238,29 @@ class Plugin_Activation_Status {
 	function active_plugins_metabox() {
 		$this->list_active_plugins();
 	}
+
+	/**
+	 * Retrieve the default message when a plugin list has not yet been generated
+     *
+     * @access private
+     * @since  1.0.2.1
+     * @return string
+	 */
+	private function _get_default_no_list_message() {
+		$message_text = '<p>';
+		$message_text .= __( 'An existing copy of this list could not be found in the database.', 'plugin-activation-status' );
+		$message_text .= __( 'In order to view it, you will need to generate it using the button above.', 'plugin-activation-status' );
+		$message_text .= '</p>';
+
+		return $message_text;
+    }
 	
 	/**
 	 * Output the Inactive Plugins list
 	 */
 	function list_inactive_plugins() {
 		if ( $this->use_cache ) {
-			echo get_site_option( 'pas_inactive_plugins', __( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' ) );
+			echo get_site_option( 'pas_inactive_plugins', $this->_get_default_no_list_message() );
 			return;
 		}
 		
@@ -252,7 +282,7 @@ class Plugin_Activation_Status {
 		foreach ( $tmp as $p ) {
 			$url = network_admin_url( 'plugins.php' );
 			$url = wp_nonce_url( sprintf( '%5$s?action=delete-selected&amp;checked[]=%1$s&amp;plugin-status=%2$s&amp;paged=%3$s&amp;s=%4$s', $p, 'all', 1, null, $url ), 'bulk-plugins' );
-			$dellink = sprintf( ' (<a href="%s">%s</a>)', $url, __( 'Delete' ) );
+			$dellink = sprintf( ' (<a href="%s">%s</a>)', $url, __( 'Delete', 'plugin-activation-status' ) );
 ?>
 			<li class="<?php echo $ct%2 ? 'active' : 'inactive' ?>"><?php echo array_key_exists( $p, $this->all_plugins ) ? $this->all_plugins[$p]['Name'] : $p ?><?php echo $dellink ?></li>
 <?php
@@ -260,7 +290,7 @@ class Plugin_Activation_Status {
 		}
 ?>
 	    </ol>
-        <p><small><em><?php printf( __( 'List generated on %s at %s' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) ) ?></em></small></p>
+        <p><small><em><?php printf( __( 'List generated on %s at %s', 'plugin-activation-status' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) ) ?></em></small></p>
 	</div>
 <?php
 		$list = ob_get_clean();
@@ -273,7 +303,7 @@ class Plugin_Activation_Status {
 	 */
 	function list_active_plugins() {
 		if ( $this->use_cache ) {
-			echo get_site_option( 'pas_active_plugins', __( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' ) );
+			echo get_site_option( 'pas_active_plugins', $this->_get_default_no_list_message() );
 			return;
 		}
 		
@@ -316,7 +346,7 @@ class Plugin_Activation_Status {
 <?php
 			if ( array_key_exists( $p, $this->active_on ) ) {
 				if ( array_key_exists( 'network', $this->active_on[$p] ) && ! empty( $this->active_on[$p]['network'] ) ) {
-					echo '<h4>' . __( 'Network Activated:' ) . '</h4>';
+					echo '<h4>' . __( 'Network Activated:', 'plugin-activation-status' ) . '</h4>';
 					echo '<ul>';
 					foreach ( $this->active_on[$p]['network'] as $id => $n ) {
 						echo '<li>' . $id . '. ' . $n . '</li>';
@@ -331,10 +361,10 @@ class Plugin_Activation_Status {
 							<input type="hidden" name="networks" value="%4$s"/>
 							<input type="submit" class="button" value="%3$s"/>
 						</p>
-					</form>', $p, 'deactivate-all-networks', __( 'Network Deactivate on All Networks' ), urlencode( json_encode( $this->active_on[$p]['network'] ) ), wp_nonce_field( 'pas_deactivate_plugins', '_pas_deactivate_plugins', true, false ) );
+					</form>', $p, 'deactivate-all-networks', __( 'Network Deactivate on All Networks', 'plugin-activation-status' ), urlencode( json_encode( $this->active_on[$p]['network'] ) ), wp_nonce_field( 'pas_deactivate_plugins', '_pas_deactivate_plugins', true, false ) );
 				}
 				if ( array_key_exists( 'site', $this->active_on[$p] ) && ! empty( $this->active_on[$p]['site'] ) ) {
-					echo '<h4>' . __( 'Blog Activated:' ) . '</h4>';
+					echo '<h4>' . __( 'Blog Activated:', 'plugin-activation-status' ) . '</h4>';
 					echo '<ul>';
 					foreach ( $this->active_on[$p]['site'] as $id=>$n ) {
 						echo '<li>' . $id . '. ' . $n . '</li>';
@@ -349,10 +379,10 @@ class Plugin_Activation_Status {
 							<input type="hidden" name="blogs" value="%4$s"/>
 							<input type="submit" class="button" value="%3$s"/>
 						</p>
-					</form>', $p, 'deactivate-all-blogs', __( 'Deactivate on All Sites' ), urlencode( json_encode( $this->active_on[$p]['site'] ) ), wp_nonce_field( 'pas_deactivate_plugins', '_pas_deactivate_plugins', true, false ) );
+					</form>', $p, 'deactivate-all-blogs', __( 'Deactivate on All Sites', 'plugin-activation-status' ), urlencode( json_encode( $this->active_on[$p]['site'] ) ), wp_nonce_field( 'pas_deactivate_plugins', '_pas_deactivate_plugins', true, false ) );
 				}
 			} else {
-				echo '<p>' . __( 'For some reason, a list of the sites and networks on which this plugin is active could not be retrieved' ) . '</p>';
+				echo '<p>' . __( 'For some reason, a list of the sites and networks on which this plugin is active could not be retrieved', 'plugin-activation-status' ) . '</p>';
 			}
 ?>
                     </td>
@@ -362,7 +392,7 @@ class Plugin_Activation_Status {
 ?>
             </tbody>
         </table>
-        <p><small><em><?php printf( __( 'List generated on %s at %s' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) ) ?></em></small></p>
+        <p><small><em><?php printf( __( 'List generated on %s at %s', 'plugin-activation-status' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) ) ?></em></small></p>
     </div>
 <?php
 		$list = ob_get_clean();
