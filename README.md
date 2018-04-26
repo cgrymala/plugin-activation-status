@@ -7,9 +7,9 @@
 
 **Requires at least:** 3.8
 
-**Tested up to:** 4.8.1
+**Tested up to:** 4.9.5
 
-**Stable tag:** 1.1.1
+**Stable tag:** 1.1.2
 
 **License:** GPLv2 or later
 
@@ -68,6 +68,9 @@ To make a long story short (too late!), those are plugins that are still conside
 
 
 ## Changelog ##
+
+### 1.1.2 ###
+* Test compatibility with latest version of WordPress and update readme to reflect compatibility
 
 ### 1.1.1 ###
 * Implement better method to test for main network

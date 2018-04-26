@@ -2,7 +2,7 @@
 /**
  * Define the Plugin_Activation_Status class
  * @package Plugin Activation Status
- * @version 1.1.1
+ * @version 1.1.2
  */
 
 class Plugin_Activation_Status {
@@ -13,7 +13,7 @@ class Plugin_Activation_Status {
 	var $blogs = array();
 	var $sites = array();
 	var $use_cache = true;
-	var $version = '1.1.1';
+	var $version = '1.1.2';
 	
 	/**
 	 * Construct our Plugin_Activation_Status object
