@@ -104,7 +104,7 @@ class Plugin_Activation_Status {
 	function submenu_page() {
 ?>
 <div id="poststuff" class="wrap metabox-holder">
-	<h2><?php _e( 'Locate Active Plugins' ) ?></h2>
+	<h1 class="wp-heading-inline"><?php _e( 'Locate Active Plugins' ) ?></h1>
 	<p><?php _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.' ) ?></p>
 <?php
 		if ( $this->use_cache ) {
@@ -327,7 +327,7 @@ class Plugin_Activation_Status {
 		
 		return;
 	}
-	
+
 	/**
 	 * Deactivate plugins according to command
 	 */
