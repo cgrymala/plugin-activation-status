@@ -138,16 +138,12 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 		}
 	}
 
-	function get_bulk_action_message( $deactivated, $where = 'blogs' ) {
-		if ( 'networks' !== $where ) {
-			$where = 'blogs';
-		}
-
-		$message = __( 'Successfully deactivated the following plugins:<ul>' );
+	function get_bulk_action_message( $deactivated, $where ) {
+		$message = __( 'Successfully deactivated the following plugins:<ul>', 'plugin-activation-status' );
 		foreach ( $deactivated as $plugin => $places ) {
 			$message .= '<li>';
 			$message .= $plugin;
-			$message .= sprintf( __( ' on the following %s: <ul><li>' ), $where );
+			$message .= sprintf( __( ' on the following %s: <ul><li>', 'plugin-activation-status' ), $where );
 			$message .= implode( '</li><li>', $places );
 			$message .= '</li></ul></li>';
 		}
@@ -171,7 +167,7 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 				}
 			}
 
-			$message = $this->get_bulk_action_message( $deactivated );
+			$message = $this->get_bulk_action_message( $deactivated, __( 'blogs', 'plugin-activation-status' ) );
 		} else if ( 'network-deactivate' == $this->current_action() ) {
 			$deactivated = array();
 			foreach ( $_POST['pas_plugin_bulk_actions'] as $plugin ) {
@@ -182,7 +178,7 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 				}
 			}
 
-			$message = $this->get_bulk_action_message( $deactivated, 'networks' );
+			$message = $this->get_bulk_action_message( $deactivated, __( 'networks', 'plugin-activation-status' ) );
 		}
 
 		$url = network_admin_url( 'plugins.php' );

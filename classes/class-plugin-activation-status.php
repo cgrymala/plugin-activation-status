@@ -101,7 +101,7 @@ class Plugin_Activation_Status {
 			return;
 		}
 
-		add_submenu_page( 'plugins.php', __( 'Locate Active Plugins' ), __( 'Active Plugins' ), 'delete_plugins', 'all_active_plugins', array(
+		add_submenu_page( 'plugins.php', __( 'Locate Active Plugins', 'plugin-activation-status' ), __( 'Active Plugins', 'plugin-activation-status' ), 'delete_plugins', 'all_active_plugins', array(
 			$this,
 			'submenu_page'
 		) );
@@ -114,7 +114,7 @@ class Plugin_Activation_Status {
 	function submenu_page() {
 		?>
         <div id="poststuff" class="wrap metabox-holder">
-            <h1 class="wp-heading-inline"><?php _e( 'Locate Active Plugins' ) ?></h1>
+            <h1 class="wp-heading-inline"><?php _e( 'Locate Active Plugins', 'plugin-activation-status' ) ?></h1>
 			<?php
 			$this->list_plugins();
 			?>
@@ -128,15 +128,15 @@ class Plugin_Activation_Status {
 	 * @uses add_meta_box() to register those meta boxes
 	 */
 	function add_meta_boxes() {
-		add_meta_box( 'pas_information', __( 'Plugin Activation Status' ), array(
+		add_meta_box( 'pas_information', __( 'Plugin Activation Status', 'plugin-activation-status' ), array(
 			$this,
 			'plugin_info_metabox'
 		), 'all_active_plugins' );
-		add_meta_box( 'inactive_plugins', __( 'Inactive Plugins' ), array(
+		add_meta_box( 'inactive_plugins', __( 'Inactive Plugins', 'plugin-activation-status' ), array(
 			$this,
 			'inactive_plugins_metabox'
 		), 'all_active_plugins' );
-		add_meta_box( 'active_plugins', __( 'Active Plugins' ), array(
+		add_meta_box( 'active_plugins', __( 'Active Plugins', 'plugin-activation-status' ), array(
 			$this,
 			'active_plugins_metabox'
 		), 'all_active_plugins' );
@@ -147,16 +147,30 @@ class Plugin_Activation_Status {
 	 */
 	function plugin_info_metabox() {
 		?>
-        <p><?php _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.' ) ?></p>
+        <p><?php
+			_e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. ', 'plugin-activation-status' );
+			_e( 'This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.', 'plugin-activation-status' );
+			?></p>
 		<?php
 		if ( $this->use_cache ) {
-			printf( __( '<p>If you have generated this list before, the most recent version should be displayed below. The date/time each list was generated is included within the list. Keep in mind that the dates/times included are your server\'s date/time and may not reflect your local date/time. The current date/time on your server is %2$s %3$s.</p><p>If you would like to generate a new list with your current data, please press the "%1$s" button below.</p>' ), __( 'Continue' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) );
+			$message_text = '<p>';
+			$message_text .= __( 'If you have generated this list before, the most recent version should be displayed below.', 'plugin-activation-status' );
+			$message_text .= ' ' . __( 'The date/time each list was generated is included within the list.', 'plugin-activation-status' );
+			$message_text .= ' ' . __( 'Keep in mind that the dates/times included are your server\'s date/time and may not reflect your local date/time.', 'plugin-activation-status' );
+			$message_text .= ' ' . __( 'The current date/time on your server is %1$s %2$s.', 'plugin-activation-status' );
+			$message_text .= '</p>';
+			$message_text .= '<p>';
+			$message_text .= __( 'If you would like to generate a new list with your current data, please press the "%1$s" button below.', 'plugin-activation-status' );
+			$message_text .= '</p>';
+
+			printf( $message_text, __( 'Continue', 'plugin-activation-status' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) );
 			?>
             <form action="">
                 <input type="hidden" name="page" value="all_active_plugins"/>
 				<?php wp_nonce_field( 'active_plugins', '_active_plugins_nonce' ) ?>
                 <input type="hidden" name="list_active_plugins" value="1"/>
-                <p><input type="submit" class="button button-primary" value="<?php _e( 'Continue' ) ?>"/></p>
+                <p><input type="submit" class="button button-primary"
+                          value="<?php _e( 'Continue', 'plugin-activation-status' ) ?>"/></p>
             </form>
 			<?php
 		}
@@ -180,7 +194,7 @@ class Plugin_Activation_Status {
 	 */
 	function list_plugins() {
 		if ( ! function_exists( 'get_plugins' ) ) {
-			_e( '<p>There was an error retrieving the list of plugins. The get_plugins() function does not seem to exist.</p>' );
+			_e( '<p>There was an error retrieving the list of plugins. The get_plugins() function does not seem to exist.</p>', 'plugin-activation-status' );
 
 			return;
 		}
@@ -301,6 +315,22 @@ class Plugin_Activation_Status {
 	}
 
 	/**
+	 * Retrieve the default message when a plugin list has not yet been generated
+	 *
+	 * @access private
+	 * @since  1.0.2.1
+	 * @return string
+	 */
+	private function _get_default_no_list_message() {
+		$message_text = '<p>';
+		$message_text .= __( 'An existing copy of this list could not be found in the database.', 'plugin-activation-status' );
+		$message_text .= __( 'In order to view it, you will need to generate it using the button above.', 'plugin-activation-status' );
+		$message_text .= '</p>';
+
+		return $message_text;
+	}
+
+	/**
 	 * Output the Inactive Plugins list
 	 */
 	function list_inactive_plugins() {
@@ -313,7 +343,7 @@ class Plugin_Activation_Status {
 			if ( ! is_array( $tmp ) ) {
 				$this->parse_plugins();
 			} else if ( empty( $tmp['all_plugins'] ) ) {
-				_e( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' );
+				echo $this->_get_default_no_list_message();
 			} else {
 				$this->all_plugins      = $tmp['all_plugins'];
 				$this->active_plugins   = $tmp['active_plugins'];
@@ -355,7 +385,7 @@ class Plugin_Activation_Status {
 			if ( ! is_array( $tmp ) ) {
 				$this->parse_plugins();
 			} else if ( empty( $tmp['all_plugins'] ) ) {
-				_e( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' );
+				echo $this->_get_default_no_list_message();
 			} else {
 				$this->all_plugins      = $tmp['all_plugins'];
 				$this->active_plugins   = $tmp['active_plugins'];
