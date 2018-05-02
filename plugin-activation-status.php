@@ -11,17 +11,19 @@ Text Domain: plugin-activation-status
 */
 
 if ( ! class_exists( 'Plugin_Activation_Status' ) ) {
-	if ( file_exists( plugin_dir_path( __FILE__ ) . 'classes/class-plugin-activation-status.php' ) )
+	if ( file_exists( plugin_dir_path( __FILE__ ) . 'classes/class-plugin-activation-status.php' ) ) {
 		require_once( plugin_dir_path( __FILE__ ) . 'classes/class-plugin-activation-status.php' );
-	elseif ( file_exists( plugin_dir_path( __FILE__ ) . 'plugin-activation-status/classes/class-plugin-activation-status.php' ) )
+	} elseif ( file_exists( plugin_dir_path( __FILE__ ) . 'plugin-activation-status/classes/class-plugin-activation-status.php' ) ) {
 		require_once( plugin_dir_path( __FILE__ ) . 'plugin-activation-status/classes/class-plugin-activation-status.php' );
+	}
 }
 
 add_action( 'plugins_loaded', 'inst_plugin_activation_status' );
 function inst_plugin_activation_status() {
-	if ( ! class_exists( 'Plugin_Activation_Status' ) )
+	if ( ! class_exists( 'Plugin_Activation_Status' ) ) {
 		return;
-	
+	}
+
 	global $plugin_activation_status_obj;
 	$plugin_activation_status_obj = new Plugin_Activation_Status;
 }
