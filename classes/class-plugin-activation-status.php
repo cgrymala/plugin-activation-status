@@ -39,6 +39,8 @@ class Plugin_Activation_Status {
 			return;
 		}
 
+		add_action( 'init', array( $this, 'load_textdomain' ) );
+
 		add_action( 'network_admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'add_meta_boxes' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -77,6 +79,17 @@ class Plugin_Activation_Status {
 		}
 
 		return ( intval( $main_network_id ) === intval( $GLOBALS['site_id'] ) );
+	}
+
+	/**
+	 * Initiate the plugin text domain
+	 *
+	 * @access public
+	 * @since  1.0.2.1
+	 * @return bool
+	 */
+	public function load_textdomain() {
+		load_plugin_textdomain( 'plugin-activation-status', false, dirname( plugin_basename( dirname( __FILE__ ) ) ) . '/lang' );
 	}
 
 	/**
