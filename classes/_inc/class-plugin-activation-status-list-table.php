@@ -127,6 +127,24 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 				break;
 		}
 	}
+
+	function get_bulk_action_message( $deactivated, $where='blogs' ) {
+		if ( 'networks' !== $where ) {
+			$where = 'blogs';
+		}
+
+		$message = __( 'Successfully deactivated the following plugins:<ul>' );
+		foreach( $deactivated as $plugin => $places ) {
+			$message .= '<li>';
+			$message .= $plugin;
+			$message .= sprintf( __( ' on the following %s: <ul><li>' ), $where );
+			$message .= implode( '</li><li>', $places );
+			$message .= '</li></ul></li>';
+		}
+		$message .= '</ul>';
+
+		return $message;
+	}
 	
 	function process_bulk_action() {
 		if ( ! isset( $_POST['pas_plugin_bulk_actions'] ) ) {
@@ -134,28 +152,40 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 		}
 
 		if ( 'blog-deactivate' == $this->current_action() ) {
+			$deactivated = array();
 			foreach ( $_POST['pas_plugin_bulk_actions'] as $plugin ) {
-				foreach ( $this->get_blog_active_on( $plugin ) as $blog ) {
+				$deactivated[$plugin] = array();
+				foreach ( $this->get_blog_active_on( $plugin ) as $blog => $blog_info ) {
 					$this->deactivate_plugin( $plugin, $blog );
+					$deactivated[$plugin][] = $blog_info;
 				}
 			}
+
+			$message = $this->get_bulk_action_message( $deactivated );
 		} else if ( 'network-deactivate' == $this->current_action() ) {
+			$deactivated = array();
 			foreach ( $_POST['pas_plugin_bulk_actions'] as $plugin ) {
-				foreach ( $this->get_network_active_on( $plugin ) as $network ) {
+				$deactivated[$plugin] = array();
+				foreach ( $this->get_network_active_on( $plugin ) as $network => $network_info ) {
 					$this->network_deactivate_plugin( $plugin, $network );
+					$deactivated[$plugin][] = $network_info;
 				}
 			}
+
+			$message = $this->get_bulk_action_message( $deactivated, 'networks' );
 		}
 
 		$url = network_admin_url( 'plugins.php' );
-		$url = add_query_arg( 'page', 'all_active_plugins', $url );
-		$url = add_query_arg( 'list_active_plugins', '1', $url );
-		$url = wp_nonce_url( 'active_plugins', '_active_plugins_nonce', $url );
-		print( '<pre><code>' );
-		var_dump( $url );
-		print( '</code></pre>' );
-		return;
+		$url = add_query_arg( array(
+			'page' => 'all_active_plugins',
+			'list_active_plugins' => 1,
+			'message' => urlencode( $message ),
+			'time' => time(),
+		), $url );
+		$url = wp_nonce_url( $url, 'active_plugins', '_active_plugins_nonce' );
+
 		wp_safe_redirect( $url );
+		die();
 	}
 
 	function deactivate_plugin( $plugin, $blog ) {
@@ -165,22 +195,36 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 		$wpdb->set_blog_id( $b );
 		$active_plugins = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name=%s", 'active_plugins' ) );
 		if ( is_wp_error( $active_plugins ) ) {
-			return;
+			return false;
 		}
 		if ( ! is_array( $active_plugins ) )
 			$active_plugins = maybe_unserialize( $active_plugins );
 		if ( ! is_array( $active_plugins ) )
-			return;
+			return false;
 
-		if ( in_array( $_POST['plugin'], $active_plugins ) ) {
-			$index = array_search( $_POST['plugin'], $active_plugins );
-			unset( $active_plugins[$index] );
-		} elseif ( array_key_exists( $_POST['plugin'], $active_plugins ) ) {
-			unset( $active_plugins[$_POST['plugin']] );
+		$recent_plugins = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name=%s", 'recently_activated' ) );
+		if ( empty( $recent_plugins ) || is_wp_error( $recent_plugins ) ) {
+			$recent_plugins = array();
+		} else if ( ! is_array( $recent_plugins ) ) {
+			$recent_plugins = maybe_unserialize( $recent_plugins );
 		}
+		if ( ! is_array( $recent_plugins ) ) {
+			$recent_plugins = array();
+		}
+
+		if ( in_array( $plugin, $active_plugins ) ) {
+			$index = array_search( $plugin, $active_plugins );
+			$recent_plugins[$index] = $active_plugins[$index];
+			unset( $active_plugins[$index] );
+		} elseif ( array_key_exists( $plugin, $active_plugins ) ) {
+			$recent_plugins[$plugin] = $active_plugins[$plugin];
+			unset( $active_plugins[$plugin] );
+		}
+
+		$wpdb->update( $wpdb->options, array( 'option_value' => maybe_serialize( $recent_plugins ) ), array( 'option_name' => 'recently_activated' ), array( '%s' ), array( '%s' ) );
 		$done = $wpdb->update( $wpdb->options, array( 'option_value' => maybe_serialize( $active_plugins ) ), array( 'option_name' => 'active_plugins' ), array( '%s' ), array( '%s' ) );
 
-		return;
+		return $done;
 	}
 
 	function network_deactivate_plugin( $plugin, $network ) {
@@ -189,22 +233,35 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 
 		$active_plugins = $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->sitemeta} WHERE meta_key=%s AND site_id=%d", 'active_sitewide_plugins', $n ) );
 		if ( is_wp_error( $active_plugins ) ) {
-			return;
+			return false;
 		}
 		if ( ! is_array( $active_plugins ) )
 			$active_plugins = maybe_unserialize( $active_plugins );
 		if ( ! is_array( $active_plugins ) )
-			return;
+			return false;
+
+		$recent_plugins = $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->sitemeta} WHERE meta_key=%s AND site_id=%d", 'recently_activated', $n ) );
+		if ( empty( $recent_plugins ) || is_wp_error( $recent_plugins ) ) {
+			$recent_plugins = array();
+		} else if ( ! is_array( $recent_plugins ) ) {
+			$recent_plugins = maybe_unserialize( $recent_plugins );
+		}
+		if ( ! is_array( $recent_plugins ) ) {
+			$recent_plugins = array();
+		}
 
 		if ( in_array( $plugin, $active_plugins ) ) {
 			$index = array_search( $plugin, $active_plugins );
+			$recent_plugins[$index] = $active_plugins[$index];
 			unset( $active_plugins[$index] );
 		} elseif ( array_key_exists( $plugin, $active_plugins ) ) {
+			$recent_plugins[$plugin] = $active_plugins[$plugin];
 			unset( $active_plugins[$plugin] );
 		}
+		$wpdb->update( $wpdb->sitemeta, array( 'meta_value' => maybe_serialize( $recent_plugins ) ), array( 'meta_key' => 'recently_activated', 'site_id' => $n ), array( '%s' ), array( '%s', '%d' ) );
 		$done = $wpdb->update( $wpdb->sitemeta, array( 'meta_value' => maybe_serialize( $active_plugins ) ), array( 'meta_key' => 'active_sitewide_plugins', 'site_id' => $n ), array( '%s' ), array( '%s', '%d' ) );
 
-		return;
+		return $done;
 	}
 	
 	function usort_reorder( $a, $b ) {

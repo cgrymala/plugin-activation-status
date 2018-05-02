@@ -69,6 +69,10 @@ To make a long story short (too late!), those are plugins that are still conside
 
 ## Changelog ##
 
+### 2.0 ###
+* Implements new layout of plugin lists
+* Adds deactivated plugins to list of Recently Active plugins in appropriate admin pages
+
 ### 1.1.2 ###
 * Test compatibility with latest version of WordPress and update readme to reflect compatibility
 
@@ -96,6 +100,9 @@ To make a long story short (too late!), those are plugins that are still conside
 * First beta release of "UMW Plugin Locator"
 
 ## Upgrade Notice ##
+
+### 2.0 ###
+Completely new layout; some new functionality
 
 ### 1.1 ###
 The file structure of this plugin has changed; if you are upgrading manually (especially if this is a mu-plugin), be sure to delete old files & upload all-new versions

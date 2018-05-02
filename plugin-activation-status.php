@@ -2,11 +2,12 @@
 /*
 Plugin Name: Plugin Activation Status
 Description: This plugin scans an entire WordPress multisite or multi-network installation and identifies which plugins are active (and where they're active) and which plugins are not activated anywhere in the install
-Version: 1.1.2
+Version: 1.999
 Author: Curtiss Grymala
 Author URI: http://www.umw.edu/
 License: GPL2
 Network: true
+Text Domain: plugin-activation-status
 */
 
 if ( ! class_exists( 'Plugin_Activation_Status' ) ) {

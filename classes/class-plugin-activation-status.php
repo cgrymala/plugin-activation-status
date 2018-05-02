@@ -29,6 +29,10 @@ class Plugin_Activation_Status {
 	 * @uses add_action() to enqueue the plugin's styles on the admin_print_styles hook
 	 */
 	function __construct() {
+	    if ( isset( $_GET['pas_redirect_to'] ) ) {
+	        wp_safe_redirect( $_GET['pas_redirect_to'] );
+        }
+
 		if ( ! is_multisite() || false === $this->is_main_network() || ! current_user_can( 'delete_plugins' ) ) {
 		    error_log( '[Plugin Activation Status]: We bailed out before registering the admin menu for some reason' );
 			return;
@@ -105,20 +109,7 @@ class Plugin_Activation_Status {
 ?>
 <div id="poststuff" class="wrap metabox-holder">
 	<h1 class="wp-heading-inline"><?php _e( 'Locate Active Plugins' ) ?></h1>
-	<p><?php _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.' ) ?></p>
 <?php
-		if ( $this->use_cache ) {
-			printf( __( '<p>If you have generated this list before, the most recent version should be displayed below. The date/time each list was generated is included within the list. Keep in mind that the dates/times included are your server\'s date/time and may not reflect your local date/time. The current date/time on your server is %2$s %3$s.</p><p>If you would like to generate a new list with your current data, please press the "%1$s" button below.</p>' ), __( 'Continue' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) );
-?>
-	<form action="">
-		<input type="hidden" name="page" value="all_active_plugins"/>
-		<?php wp_nonce_field( 'active_plugins', '_active_plugins_nonce' ) ?>
-		<input type="hidden" name="list_active_plugins" value="1"/>
-		<p><input type="submit" class="button button-primary" value="<?php _e( 'Continue' ) ?>"/></p>
-	</form>
-<?php
-		}
-		
 		$this->list_plugins();
 ?>
 </div>
@@ -131,8 +122,33 @@ class Plugin_Activation_Status {
 	 * @uses add_meta_box() to register those meta boxes
 	 */
 	function add_meta_boxes() {
+	    add_meta_box( 'pas_information', __( 'Plugin Activation Status' ), array( $this, 'plugin_info_metabox' ), 'all_active_plugins' );
 		add_meta_box( 'inactive_plugins', __( 'Inactive Plugins' ), array( $this, 'inactive_plugins_metabox' ), 'all_active_plugins' );
 		add_meta_box( 'active_plugins', __( 'Active Plugins' ), array( $this, 'active_plugins_metabox' ), 'all_active_plugins' );
+	}
+
+	/**
+	 * Output a meta box with general intro/info about this plugin
+	 */
+	function plugin_info_metabox() {
+?>
+	    	<p><?php _e( 'This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times.' ) ?></p>
+<?php
+		if ( $this->use_cache ) {
+			printf( __( '<p>If you have generated this list before, the most recent version should be displayed below. The date/time each list was generated is included within the list. Keep in mind that the dates/times included are your server\'s date/time and may not reflect your local date/time. The current date/time on your server is %2$s %3$s.</p><p>If you would like to generate a new list with your current data, please press the "%1$s" button below.</p>' ), __( 'Continue' ), date( get_option( 'date_format' ) ), date( get_option( 'time_format' ) ) );
+?>
+	<form action="">
+		<input type="hidden" name="page" value="all_active_plugins"/>
+		<?php wp_nonce_field( 'active_plugins', '_active_plugins_nonce' ) ?>
+		<input type="hidden" name="list_active_plugins" value="1"/>
+		<p><input type="submit" class="button button-primary" value="<?php _e( 'Continue' ) ?>"/></p>
+	</form>
+<?php
+		}
+
+		if ( isset( $_GET['message'] ) ) {
+			printf( '<div class="message warning">%s</div>', $_GET['message'] );
+		}
 	}
 	
 	/**
@@ -265,17 +281,19 @@ class Plugin_Activation_Status {
 	 */
 	function list_inactive_plugins() {
 		if ( $this->use_cache ) {
-			$inactive = get_site_option( 'pas_inactive_plugins', array() );
-			if ( ! is_array( $inactive ) ) {
-				$this->parse_plugins();
-			} else if ( empty( $inactive ) ) {
+			$tmp = get_site_option( 'pas_active_plugins', array( 'all_plugins' => array(), 'active_plugins' => array(), 'active_on' => array() ) );
+			if ( ! is_array( $tmp ) ) {
+			    $this->parse_plugins();
+			} else if ( empty( $tmp['all_plugins'] ) ) {
 				_e( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' );
-				return;
 			} else {
-				$this->inactive_plugins = $inactive;
+				$this->all_plugins      = $tmp['all_plugins'];
+				$this->active_plugins   = $tmp['active_plugins'];
+				$this->active_on        = $tmp['active_on'];
+				$this->inactive_plugins = $tmp['inactive_plugins'];
 			}
 		}
-		
+
 		if ( ! class_exists( 'WP_List_Table' ) )
 			require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 		if ( ! class_exists( 'Plugin_Activation_Status_List_Table_Inactive' ) ) 
@@ -300,15 +318,18 @@ class Plugin_Activation_Status {
 	function list_active_plugins() {
 		if ( $this->use_cache ) {
 			$tmp = get_site_option( 'pas_active_plugins', array( 'all_plugins' => array(), 'active_plugins' => array(), 'active_on' => array() ) );
-			if ( is_array( $tmp ) ) {
-				$this->all_plugins = $tmp['all_plugins'];
-				$this->active_plugins = $tmp['active_plugins'];
-				$this->active_on = $tmp['active_on'];
-			} else {
+			if ( ! is_array( $tmp ) ) {
 				$this->parse_plugins();
+			} else if ( empty( $tmp['all_plugins'] ) ) {
+				_e( '<p>An existing copy of this list could not be found in the database. In order to view it, you will need to generate it using the button above.</p>' );
+			} else {
+				$this->all_plugins      = $tmp['all_plugins'];
+				$this->active_plugins   = $tmp['active_plugins'];
+				$this->active_on        = $tmp['active_on'];
+				$this->inactive_plugins = $tmp['inactive_plugins'];
 			}
 		}
-		
+
 		if ( ! class_exists( 'WP_List_Table' ) )
 			require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 		if ( ! class_exists( 'Plugin_Activation_Status_List_Table' ) ) 
@@ -319,7 +340,7 @@ class Plugin_Activation_Status {
 		$table->set_active_plugins( $this->active_plugins );
 		$table->set_active_on( $this->active_on );
 		$table->prepare_items( $this->active_plugins );
-		
+
 		echo '<form id="active-plugin-list-table" method="post">';
 		echo '<input type="hidden" name="page" value="' . $_REQUEST['page'] . '" />';
 		$table->display();
