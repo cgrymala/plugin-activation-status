@@ -62,14 +62,11 @@ To make a long story short (too late!), those are plugins that are still conside
 
 ## Screenshots ##
 
-###1. An example of the introductory information presented on the plugin's admin page ###
-(screenshot-1.jpg)
+### 1. [An example of the introductory information presented on the plugin's admin page](screenshot-1.jpg) ###
 
-###2. Part of the "Inactive Plugins" list presented by this plugin ###
-(screenshot-2.jpg)
+### 2. [Part of the "Inactive Plugins" list presented by this plugin](screenshot-2.jpg) ###
 
-###3. Part of the "Active Plugins" list presented by this plugin ###
-(screenshot-3.jpg)
+### 3. [Part of the "Active Plugins" list presented by this plugin](screenshot-3.jpg) ###
 
 ## Changelog ##
 
