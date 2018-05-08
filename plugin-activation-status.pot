@@ -1,0 +1,137 @@
+# Copyright (C) 2018 Plugin Activation Status
+# This file is distributed under the same license as the Plugin Activation Status package.
+msgid ""
+msgstr ""
+"Project-Id-Version: Plugin Activation Status 1.999\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/plugin-activation-status\n"
+"POT-Creation-Date: 2018-05-02 20:07:28+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2018-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: classes/_inc/class-plugin-activation-status-list-table-inactive.php:43
+#: classes/_inc/class-plugin-activation-status-list-table.php:58
+msgid "Plugin Name"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table-inactive.php:44
+#: classes/_inc/class-plugin-activation-status-list-table.php:61
+msgid "Raw Plugin Data"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table-inactive.php:70
+msgid "Delete Plugin Files"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table.php:59
+msgid "Network Activated On"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table.php:60
+msgid "Blog Activated On"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table.php:89
+msgid "Deactivate on All Networks"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table.php:90
+msgid "Deactivate on All Sites"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table.php:142
+msgid "Successfully deactivated the following plugins:<ul>"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table.php:146
+msgid " on the following %s: <ul><li>"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table.php:170
+msgid "blogs"
+msgstr ""
+
+#: classes/_inc/class-plugin-activation-status-list-table.php:181
+msgid "networks"
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:118
+#: classes/class-plugin-activation-status.php:131
+msgid "Locate Active Plugins"
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:118
+#: classes/class-plugin-activation-status.php:153
+msgid "Active Plugins"
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:145
+msgid "Plugin Activation Status"
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:149
+msgid "Inactive Plugins"
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:165
+msgid "This page will display a list of all plugins installed throughout this WordPress installation, and indicate whether that plugin is active on any sites or not. "
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:166
+msgid "This process can take quite a few resources, so it is not recommended that you run the process during any high-traffic times."
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:171
+msgid "If you have generated this list before, the most recent version should be displayed below."
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:172
+msgid "The date/time each list was generated is included within the list."
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:173
+msgid "Keep in mind that the dates/times included are your server's date/time and may not reflect your local date/time."
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:174
+msgid "The current date/time on your server is %1$s %2$s."
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:177
+msgid "If you would like to generate a new list with your current data, please press the \"%1$s\" button below."
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:180
+#: classes/class-plugin-activation-status.php:187
+msgid "Continue"
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:211
+msgid "<p>There was an error retrieving the list of plugins. The get_plugins() function does not seem to exist.</p>"
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:340
+msgid "An existing copy of this list could not be found in the database."
+msgstr ""
+
+#: classes/class-plugin-activation-status.php:341
+msgid "In order to view it, you will need to generate it using the button above."
+msgstr ""
+#. Plugin Name of the plugin/theme
+msgid "Plugin Activation Status"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "This plugin scans an entire WordPress multisite or multi-network installation and identifies which plugins are active (and where they're active) and which plugins are not activated anywhere in the install"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Curtiss Grymala"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://www.umw.edu/"
+msgstr ""
