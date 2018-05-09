@@ -1,11 +1,12 @@
 <?php
+namespace Ten321\Plugin_Activation_Status;
 /**
  * Define the Plugin_Activation_Status class
  * @package Plugin Activation Status
  * @version 1.999
  */
 
-class Plugin_Activation_Status {
+class Plugin {
 	var $active_plugins = array();
 	var $inactive_plugins = array();
 	var $active_on = array();
@@ -89,7 +90,7 @@ class Plugin_Activation_Status {
 	 * @return bool
 	 */
 	public function load_textdomain() {
-		load_plugin_textdomain( 'plugin-activation-status', false, dirname( plugin_basename( dirname( __FILE__ ) ) ) . '/lang' );
+		load_plugin_textdomain( 'plugin-activation-status', false, plugin_base() . '/lang' );
 	}
 
 	/**

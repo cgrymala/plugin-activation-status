@@ -10,6 +10,27 @@ Network: true
 Text Domain: plugin-activation-status
 */
 
+namespace {
+spl_autoload_register( function ( $class_name ) {
+	if ( ! stristr( $class_name, 'Ten321\Plugin_Activation_Status\\' ) ) {
+		return;
+	}
+
+	$file = strtolower( str_replace( array( '\\', '_' ), array( '/', '-' ), $class_name ) );
+	$fileparts = explode( '/', $class_name );
+	$filename = array_pop( $fileparts );
+	$filename = 'class-' . $filename . '.php';
+	$fileparts[] = $filename;
+
+	$filename = plugin_dir_path( __FILE__ ) . '/lib/' . implode( '/', $fileparts );
+
+	if ( ! file_exists( $filename ) ) {
+		return;
+	}
+
+	include $filename;
+}
+
 if ( ! class_exists( 'Plugin_Activation_Status' ) ) {
 	if ( file_exists( plugin_dir_path( __FILE__ ) . 'classes/class-plugin-activation-status.php' ) ) {
 		require_once( plugin_dir_path( __FILE__ ) . 'classes/class-plugin-activation-status.php' );
@@ -26,4 +47,19 @@ function inst_plugin_activation_status() {
 
 	global $plugin_activation_status_obj;
 	$plugin_activation_status_obj = new Plugin_Activation_Status;
+}
+}
+
+namespace Ten321\Plugin_Activation_Status {
+	function plugin_dir_path() {
+		return \plugin_dir_path( __FILE__ );
+	}
+
+	function plugin_basename() {
+		return \plugin_basename( __FILE__ );
+	}
+
+	function plugins_url( $path ) {
+		return \plugins_url( $path, __FILE__ );
+	}
 }

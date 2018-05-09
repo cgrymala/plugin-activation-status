@@ -122,7 +122,8 @@ To make a long story short (too late!), those are plugins that are still conside
 ## Upgrade Notice ##
 
 ### 2.0 ###
-Completely new layout; some new functionality
+* Completely new layout; some new functionality
+* You can now perform bulk actions, deactivating/deleting multiple plugins at once throughout the system
 
 ### 1.1 ###
 The file structure of this plugin has changed; if you are upgrading manually (especially if this is a mu-plugin), be sure to delete old files & upload all-new versions

@@ -1,9 +1,10 @@
 <?php
-
+namespace Ten321\Plugin_Activation_Status\List_Tables;
+use WP_List_Table;
 /**
  * Implements the table of inactive plugins
  */
-class Plugin_Activation_Status_List_Table_Inactive extends WP_List_Table {
+class Inactive extends WP_List_Table {
 	public $all_plugins = array();
 	public $inactive_plugins = array();
 	public $active_plugins = array();
