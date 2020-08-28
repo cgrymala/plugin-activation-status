@@ -242,7 +242,7 @@ class Plugin_Activation_Status {
 			if ( ! is_array( $v ) ) {
 				continue;
 			}
-			if ( count( v ) <= 0 ) {
+			if ( count( $v ) <= 0 ) {
 				continue;
 			}
 
