@@ -266,6 +266,8 @@ class Plugin_Activation_Status {
 		foreach ( $this->blogs as $b ) {
 			$wpdb->set_blog_id( $b );
 
+			$this->fix_recently_active_plugins( $b );
+
 			$blog_name = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name=%s", 'blogname' ) );
 			$blog_url  = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name=%s", 'siteurl' ) );
 
@@ -311,6 +313,23 @@ class Plugin_Activation_Status {
 			'active_on'        => $this->active_on,
 			'inactive_plugins' => $this->inactive_plugins
 		) );
+	}
+
+	function fix_recently_active_plugins( $blog_id ) {
+		global $wpdb;
+
+		$recently_active = maybe_unserialize( $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name=%s", 'recently_activated' ) ) );
+		if ( is_array( $recently_active ) && count( $recently_active ) > 0 ) {
+			foreach ( $recently_active as $name => $time ) {
+				if ( ! is_int( $time ) ) {
+					unset( $recently_active[ $name ] );
+				}
+			}
+		} else {
+			$recently_active = array();
+		}
+
+		$wpdb->update( $wpdb->options, array( 'option_value' => maybe_serialize( $recently_active ) ), array( 'option_name' => 'recently_activated' ) );
 	}
 
 	/**
@@ -463,6 +482,13 @@ class Plugin_Activation_Status {
 					unset( $active_plugins[ $_POST['plugin'] ] );
 				}
 				$done = $wpdb->update( $wpdb->options, array( 'option_value' => maybe_serialize( $active_plugins ) ), array( 'option_name' => 'active_plugins' ), array( '%s' ), array( '%s' ) );
+
+				$recently_active = maybe_unserialize( $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name=%s", 'recently_activated' ) ) );
+				if ( is_array( $recently_active ) && ! array_key_exists( $_POST['plugin'], $recently_active ) ) {
+					$recently_active[ $_POST['plugin'] ] = time();
+
+					$wpdb->update( $wpdb->options, array( 'option_value' => maybe_serialize( $recently_active ) ), array( 'option_name' => 'recently_activated' ) );
+				}
 			}
 			$wpdb->set_blog_id( $originals['blog'], $originals['site'] );
 		} elseif ( 'deactivate-all-networks' == $_POST['pas-action'] ) {
@@ -489,10 +515,20 @@ class Plugin_Activation_Status {
 					'meta_key' => 'active_sitewide_plugins',
 					'site_id'  => $n
 				), array( '%s' ), array( '%s', '%d' ) );
+
+				$recently_active = maybe_unserialize( $wpdb->get_var( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->sitemeta} WHERE meta_key=%s AND site_id=%d", 'recently_activated', $n ) ) );
+				if ( is_array( $recently_active ) && ! array_key_exists( $_POST['plugin'], $recently_active ) ) {
+					$recently_active[ $_POST['plugin'] ] = time();
+
+					$wpdb->update( $wpdb->sitemeta, array( 'meta_value' => maybe_serialize( $recently_active ) ), array(
+						'meta_key' => 'recently_activated',
+						'site_id'  => $n
+					), array( '%s' ), array( '%s', '%d' ) );
+				}
 			}
 		}
 
-        return true;
+		return true;
 	}
 
 	/**
@@ -533,7 +569,8 @@ class Plugin_Activation_Status {
 	 */
 	function get_active_plugins() {
 		$this->active_plugins = array();
-        return $this->active_plugins;
+
+		return $this->active_plugins;
 	}
 }
 
