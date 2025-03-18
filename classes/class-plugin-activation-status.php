@@ -18,7 +18,7 @@ class Plugin_Activation_Status {
 	/**
 	 * Construct our Plugin_Activation_Status object
 	 * Exits immediately if this is not a multisite install, if this is not the root network
-	 *        or if the current user does not have the delete_plugins cap
+	 *        or if the current user does not have the manage_network_plugins cap
 	 *
 	 * @uses is_multisite() to determine whether this is a multisite install or not
 	 * @uses $site_id to determine whether this is the root network or not
@@ -33,7 +33,7 @@ class Plugin_Activation_Status {
 			wp_safe_redirect( $_GET['pas_redirect_to'] );
 		}
 
-		if ( ! is_multisite() || false === $this->is_main_network() || ! current_user_can( 'delete_plugins' ) ) {
+		if ( ! is_multisite() || false === $this->is_main_network() || ! current_user_can( 'manage_network_plugins' ) ) {
 			error_log( '[Plugin Activation Status]: We bailed out before registering the admin menu for some reason' );
 
 			return;
@@ -114,7 +114,7 @@ class Plugin_Activation_Status {
 			return;
 		}
 
-		add_submenu_page( 'plugins.php', __( 'Locate Active Plugins', 'plugin-activation-status' ), __( 'Active Plugins', 'plugin-activation-status' ), 'delete_plugins', 'all_active_plugins', array(
+		add_submenu_page( 'plugins.php', __( 'Locate Active Plugins', 'plugin-activation-status' ), __( 'Active Plugins', 'plugin-activation-status' ), 'manage_network_plugins', 'all_active_plugins', array(
 			$this,
 			'submenu_page'
 		) );
