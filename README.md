@@ -7,7 +7,7 @@
 
 **Requires at least:** 3.8
 
-**Tested up to:** 4.9.5
+**Tested up to:** 6.7
 
 **Stable tag:** 1.0.2.1
 

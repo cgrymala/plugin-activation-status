@@ -13,7 +13,7 @@ class Plugin_Activation_Status {
 	var $blogs = array();
 	var $sites = array();
 	var $use_cache = true;
-	var $version = '1.1.2';
+	var $version = '2.0.1';
 
 	/**
 	 * Construct our Plugin_Activation_Status object
@@ -53,10 +53,10 @@ class Plugin_Activation_Status {
 	/**
 	 * Test to see if this is the main network in a multi-network install
 	 *
+	 * @return bool whether this is the primary network or not
+	 * @since  1.1.1
 	 * @uses is_main_network() if that function exists
 	 * @access private
-	 * @since  1.1.1
-	 * @return bool whether this is the primary network or not
 	 */
 	private function is_main_network() {
 		if ( function_exists( 'is_main_network' ) ) {
@@ -85,11 +85,11 @@ class Plugin_Activation_Status {
 	 * Initiate the plugin text domain
 	 *
 	 * @access public
-	 * @since  1.0.2.1
 	 * @return bool
+	 * @since  1.0.2.1
 	 */
 	public function load_textdomain() {
-		load_plugin_textdomain( 'plugin-activation-status', false, dirname( plugin_basename( dirname( __FILE__ ) ) ) . '/lang' );
+		return load_plugin_textdomain( 'plugin-activation-status', false, dirname( plugin_basename( dirname( __FILE__ ) ) ) . '/lang' );
 	}
 
 	/**
@@ -331,8 +331,8 @@ class Plugin_Activation_Status {
 	 * Retrieve the default message when a plugin list has not yet been generated
 	 *
 	 * @access private
-	 * @since  1.0.2.1
 	 * @return string
+	 * @since  1.0.2.1
 	 */
 	private function _get_default_no_list_message() {
 		$message_text = '<p>';
@@ -491,6 +491,8 @@ class Plugin_Activation_Status {
 				), array( '%s' ), array( '%s', '%d' ) );
 			}
 		}
+
+        return true;
 	}
 
 	/**
@@ -526,11 +528,12 @@ class Plugin_Activation_Status {
 
 	/**
 	 * Retrieve a list of active plugins
-	 * @uses Plugin_Activation_Status::$active_plugins
 	 * @return array empty array to hold the list of plugins
+	 * @uses Plugin_Activation_Status::$active_plugins
 	 */
 	function get_active_plugins() {
 		$this->active_plugins = array();
+        return $this->active_plugins;
 	}
 }
 

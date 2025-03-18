@@ -76,11 +76,16 @@ class Plugin_Activation_Status_List_Table extends WP_List_Table {
 		) );
 	}
 
+	function get_primary_column_name() {
+		return 'plugin-name';
+	}
+
 	function get_column_info() {
 		return array(
 			$this->get_columns(),
 			$this->get_hidden_columns(),
 			$this->get_sortable_columns(),
+			$this->get_primary_column_name(),
 		);
 	}
 

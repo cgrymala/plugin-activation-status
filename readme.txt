@@ -3,7 +3,7 @@ Contributors: cgrymala
 Donate link: http://giving.umw.edu/
 Tags: plugins, multisite, multi-network, active, network-active, status
 Requires at least: 3.8
-Tested up to: 4.9.5
+Tested up to: 6.7
 Stable tag: 1.0.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
