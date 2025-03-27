@@ -34,7 +34,16 @@ class Plugin_Activation_Status {
 		}
 
 		if ( ! is_multisite() || false === $this->is_main_network() || ! current_user_can( 'manage_network_plugins' ) ) {
+
 			error_log( '[Plugin Activation Status]: We bailed out before registering the admin menu for some reason' );
+
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+	            if ( class_exists( '\QM' ) ) {
+		            do_action( 'qm/notice', '[Plugin Activation Status]: We bailed out before registering the admin menu for some reason' );
+	            } else {
+		            error_log( '[Plugin Activation Status]: We bailed out before registering the admin menu for some reason' );
+	            }
+            }
 
 			return;
 		}
